@@ -1,201 +1,179 @@
-\echo 'Code or Die Database Layout'
-\echo 'James Powell <james@dontusethiscode.com>'
-\set VERBOSITY terse
-\set ON_ERROR_STOP true
+DROP TYPE IF EXISTS SYSTEM_STATUS CASCADE;
+CREATE TYPE SYSTEM_STATUS AS ENUM ('active', 'destroyed');
 
-do language plpgsql $$ declare
-    exc_message text;
-    exc_context text;
-    exc_detail text;
-begin
 
-raise notice 'dropping schemas';
-drop schema if exists objects cascade;
-drop schema if exists names cascade;
-drop schema if exists orders cascade;
-drop schema if exists events cascade;
+DROP TYPE IF EXISTS BEAM_MODE CASCADE;
+CREATE TYPE BEAM_MODE AS ENUM ('transit', 'repair');
 
-raise notice 'creating schemas';
-create schema if not exists objects;
-create schema if not exists names;
-create schema if not exists orders;
-create schema if not exists events;
 
-raise notice 'populating schema objects';
-do $objects$ begin
-	set search_path = objects, public;
+DROP TYPE IF EXISTS TUNING_PARAMS CASCADE;
+CREATE TYPE TUNING_PARAMS AS (
+  real INTEGER, imag INTEGER
+);
 
-	drop type if exists system_status;
-	create type system_status as enum ('active', 'destroyed');
 
-	drop type if exists beam_mode;
-	create type beam_mode as enum ('transit', 'repair');
+DROP TABLE IF EXISTS systems CASCADE;
+CREATE TABLE IF NOT EXISTS systems (
+  id         SERIAL PRIMARY KEY,
+  status     SYSTEM_STATUS NOT NULL DEFAULT 'active' :: SYSTEM_STATUS,
+  mode       BEAM_MODE     NOT NULL DEFAULT 'transit' :: BEAM_MODE,
+  controller INTEGER                DEFAULT NULL,
+  production INTEGER                DEFAULT 1 CHECK (production > 0),
+  tuning     TUNING_PARAMS NOT NULL DEFAULT ROW (0, 0) :: TUNING_PARAMS
+) WITH OIDS;
 
-	drop type if exists tuning_params;
-	create type tuning_params as (
-	    real integer
-	    , imag integer
-	);
 
-	drop table if exists systems;
-	create table if not exists systems (
-		id serial primary key
-		, status system_status not null default 'active'::system_status
-		, mode beam_mode not null default 'transit'::beam_mode
-		, controller integer default null
-		, production integer default 1 check (production > 0)
-		, tuning tuning_params  not null default row(0, 0)::tuning_params
-	) with oids;
+DROP TABLE IF EXISTS routes CASCADE;
+CREATE TABLE IF NOT EXISTS routes (
+  id          SERIAL PRIMARY KEY,
+  origin      INTEGER NOT NULL REFERENCES systems (id),
+  destination INTEGER NOT NULL REFERENCES systems (id),
+  distance    INTEGER NOT NULL CHECK (distance > 0)
+);
 
-	drop table if exists routes;
-	create table if not exists routes (
-		id serial primary key
-		, origin integer not null references systems (id)
-		, destination integer not null references systems (id)
-		, distance integer not null check (distance > 0)
-	);
 
-    drop table if exists civilizations;
-	create table if not exists civilizations (
-		id serial primary key
-		, name text not null
-		, homeworld integer not null references systems (id)
-		, token text not null
-	) with oids;
+DROP TABLE IF EXISTS civilizations CASCADE;
+CREATE TABLE IF NOT EXISTS civilizations (
+  id        SERIAL PRIMARY KEY,
+  name      TEXT    NOT NULL,
+  homeworld INTEGER NOT NULL REFERENCES systems (id),
+  token     TEXT    NOT NULL
+) WITH OIDS;
 
-	alter table systems add foreign key (controller) references civilizations (id);
 
-	drop type if exists ship_status;
-	create type ship_status as enum ('active', 'destroyed');
+ALTER TABLE systems
+  ADD FOREIGN KEY (controller) REFERENCES civilizations (id);
 
-	drop table if exists ships;
-	create table if not exists ships (
-		id serial primary key
-		, shipyard integer not null references systems (id)
-		, location integer references systems (id)
-		, flag integer not null references civilizations (id)
-	) with oids;
 
-end $objects$;
+DROP TYPE IF EXISTS SHIP_STATUS;
+CREATE TYPE SHIP_STATUS AS ENUM ('active', 'destroyed');
 
-raise notice 'populating schema names';
-do $names$ begin
-	set search_path = names, public;
 
-    drop table if exists civilizations;
-    create table if not exists civilizations (
-        id serial primary key
-        , namer integer not null references objects.civilizations (id)
-        , civilization integer not null references objects.civilizations (id)
-        , name text not null
-    );
+DROP TABLE IF EXISTS ships CASCADE;
+CREATE TABLE IF NOT EXISTS ships (
+  id       SERIAL PRIMARY KEY,
+  shipyard INTEGER NOT NULL REFERENCES systems (id),
+  location INTEGER REFERENCES systems (id),
+  flag     INTEGER NOT NULL REFERENCES civilizations (id)
+) WITH OIDS;
 
-    drop table if exists systems;
-    create table if not exists systems (
-        id serial primary key
-        , namer integer not null references objects.civilizations (id)
-        , system integer not null references objects.systems (id)
-        , name text not null
-    );
 
-    drop table if exists ships;
-    create table if not exists ships (
-        id serial primary key
-        , namer integer not null references objects.civilizations (id)
-        , ship integer not null references objects.ships (id)
-        , name text not null
-    );
+DROP TABLE IF EXISTS civilizations CASCADE;
+CREATE TABLE IF NOT EXISTS civilizations (
+  id           SERIAL PRIMARY KEY,
+  namer        INTEGER NOT NULL REFERENCES civilizations (id),
+  civilization INTEGER NOT NULL REFERENCES civilizations (id),
+  name         TEXT    NOT NULL
+);
 
-end $names$;
 
-raise notice 'populating schema orders';
-do $orders$ begin
-	set search_path = orders, public;
+DROP TABLE IF EXISTS systems CASCADE;
+CREATE TABLE IF NOT EXISTS systems (
+  id     SERIAL PRIMARY KEY,
+  namer  INTEGER NOT NULL REFERENCES civilizations (id),
+  system INTEGER NOT NULL REFERENCES systems (id),
+  name   TEXT    NOT NULL
+);
 
-	drop type if exists order_status;
-	create type order_status as enum ('pending');
 
-    drop table if exists systems;
-    create table if not exists systems (
-        id serial primary key
-        , system integer not null references objects.systems (id)
-        , status order_status not null default 'pending'::order_status
-        , payload jsonb not null
-    );
+DROP TABLE IF EXISTS ships CASCADE;
+CREATE TABLE IF NOT EXISTS ships (
+  id    SERIAL PRIMARY KEY,
+  namer INTEGER NOT NULL REFERENCES civilizations (id),
+  ship  INTEGER NOT NULL REFERENCES ships (id),
+  name  TEXT    NOT NULL
+);
 
-    drop table if exists ships;
-    create table if not exists ships (
-        id serial primary key
-        , ship integer not null references objects.ships (id)
-        , status order_status not null default 'pending'::order_status
-        , payload jsonb not null
-    );
 
-end $orders$;
+DROP TYPE IF EXISTS ORDER_STATUS CASCADE;
+CREATE TYPE ORDER_STATUS AS ENUM ('pending');
 
-raise notice 'populating schema events';
-do $events$ begin
 
-	set search_path = orders, public;
-	drop table if exists build;
-	create table if not exists build (
-		id serial primary key
-		, system integer not null references objects.systems (id)
-		, owner integer not null references objects.civilizations (id)
-		, quantity integer not null check (quantity > 0)
-		, time timestamp with time zone not null default now()
-	);
+DROP TABLE IF EXISTS systems CASCADE;
+CREATE TABLE IF NOT EXISTS systems (
+  id      SERIAL PRIMARY KEY,
+  system  INTEGER      NOT NULL REFERENCES systems (id),
+  status  ORDER_STATUS NOT NULL DEFAULT 'pending' :: ORDER_STATUS,
+  payload JSONB        NOT NULL
+);
 
-	drop table if exists warp;
-	create table if not exists warp (
-		id serial primary key
-		, origin integer not null references objects.systems (id)
-		, destination integer not null references objects.systems (id)
-		, magnitude integer not null
-		, time timestamp with time zone not null default now()
-	);
 
-	drop table if exists beam_transit;
-	create table if not exists beam_transit (
-		id serial primary key
-		, ship integer not null references objects.ships (id)
-		, origin integer not null references objects.systems (id)
-		, destination integer not null references objects.systems (id)
-		, tuning objects.tuning_params not null
-		, time timestamp with time zone not null default now()
-	);
+DROP TABLE IF EXISTS ships CASCADE;
+CREATE TABLE IF NOT EXISTS ships (
+  id      SERIAL PRIMARY KEY,
+  ship    INTEGER      NOT NULL REFERENCES ships (id),
+  status  ORDER_STATUS NOT NULL DEFAULT 'pending' :: ORDER_STATUS,
+  payload JSONB        NOT NULL
+);
 
-	drop table if exists ftl_transit;
-	create table if not exists ftl_transit (
-		id serial primary key
-		, ship integer not null references objects.ships (id)
-		, origin integer not null references objects.systems (id)
-		, destination integer not null references objects.systems (id)
-		, time timestamp with time zone not null default now()
-	);
 
-    drop type if exists transit_type;
-	create type transit_type as enum ('beam', 'ftl');
+DROP TABLE IF EXISTS build CASCADE;
+CREATE TABLE IF NOT EXISTS build (
+  id       SERIAL PRIMARY KEY,
+  system   INTEGER                  NOT NULL REFERENCES systems (id),
+  owner    INTEGER                  NOT NULL REFERENCES civilizations (id),
+  quantity INTEGER                  NOT NULL CHECK (quantity > 0),
+  time     TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
+);
 
-	drop view if exists transit;
-	create or replace view transit as (
-	    select 'beam_transit'::regclass as type, ship, origin, destination, tuning, time from beam_transit
-	    union
-	    select 'ftl_transit'::regclass as type, ship, origin, destination, null as tuning, time from ftl_transit
-	);
+DROP TABLE IF EXISTS warp CASCADE;
+CREATE TABLE IF NOT EXISTS warp (
+  id          SERIAL PRIMARY KEY,
+  origin      INTEGER                  NOT NULL REFERENCES systems (id),
+  destination INTEGER                  NOT NULL REFERENCES systems (id),
+  magnitude   INTEGER                  NOT NULL,
+  time        TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
+);
 
-	drop table if exists attack;
-	create table if not exists attack (
-		id serial primary key
-		, ship integer not null references objects.ships (id)
-		, time timestamp with time zone not null default now()
-	);
+DROP TABLE IF EXISTS beam_transit CASCADE;
+CREATE TABLE IF NOT EXISTS beam_transit (
+  id          SERIAL PRIMARY KEY,
+  ship        INTEGER                  NOT NULL REFERENCES ships (id),
+  origin      INTEGER                  NOT NULL REFERENCES systems (id),
+  destination INTEGER                  NOT NULL REFERENCES systems (id),
+  tuning      TUNING_PARAMS            NOT NULL,
+  time        TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
+);
 
-end $events$;
+DROP TABLE IF EXISTS ftl_transit CASCADE;
+CREATE TABLE IF NOT EXISTS ftl_transit (
+  id          SERIAL PRIMARY KEY,
+  ship        INTEGER                  NOT NULL REFERENCES ships (id),
+  origin      INTEGER                  NOT NULL REFERENCES systems (id),
+  destination INTEGER                  NOT NULL REFERENCES systems (id),
+  time        TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
+);
 
-exception when others then
-	get stacked diagnostics exc_message = message_text;
-    get stacked diagnostics exc_context = pg_exception_context;
-    get stacked diagnostics exc_detail = pg_exception_detail;
-    raise exception E'\n------\n%\n%\n------\n\nCONTEXT:\n%\n', exc_message, exc_detail, exc_context;
-end $$;
+
+DROP TYPE IF EXISTS TRANSIT_TYPE CASCADE;
+CREATE TYPE TRANSIT_TYPE AS ENUM ('beam', 'ftl');
+
+
+DROP VIEW IF EXISTS transit;
+CREATE OR REPLACE VIEW transit AS (
+  SELECT
+    'beam_transit' :: REGCLASS AS type,
+    ship,
+    origin,
+    destination,
+    tuning,
+    time
+  FROM beam_transit
+  UNION
+  SELECT
+    'ftl_transit' :: REGCLASS AS type,
+    ship,
+    origin,
+    destination,
+    NULL                      AS tuning,
+    time
+  FROM ftl_transit
+);
+
+
+DROP TABLE IF EXISTS attack CASCADE;
+CREATE TABLE IF NOT EXISTS attack (
+  id   SERIAL PRIMARY KEY,
+  ship INTEGER                  NOT NULL REFERENCES ships (id),
+  time TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
+);
