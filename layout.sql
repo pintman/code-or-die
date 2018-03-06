@@ -1,29 +1,40 @@
+DROP TABLE IF EXISTS systems CASCADE;
+DROP TABLE IF EXISTS routes CASCADE;
+DROP TABLE IF EXISTS civilizations CASCADE;
+DROP TABLE IF EXISTS ships CASCADE;
+DROP TABLE IF EXISTS build CASCADE;
+DROP TABLE IF EXISTS warp CASCADE;
+DROP TABLE IF EXISTS beam_transit CASCADE;
+DROP TABLE IF EXISTS ftl_transit CASCADE;
+DROP TABLE IF EXISTS attack CASCADE;
+
+DROP VIEW IF EXISTS transit;
+
+DROP TYPE IF EXISTS TRANSIT_TYPE CASCADE;
 DROP TYPE IF EXISTS SYSTEM_STATUS CASCADE;
-CREATE TYPE SYSTEM_STATUS AS ENUM ('active', 'destroyed');
-
-
 DROP TYPE IF EXISTS BEAM_MODE CASCADE;
+
+CREATE TYPE TRANSIT_TYPE AS ENUM ('beam', 'ftl');
+CREATE TYPE SYSTEM_STATUS AS ENUM ('active', 'destroyed');
 CREATE TYPE BEAM_MODE AS ENUM ('transit', 'repair');
 
 
-DROP TYPE IF EXISTS TUNING_PARAMS CASCADE;
-CREATE TYPE TUNING_PARAMS AS (
-  real INTEGER, imag INTEGER
+CREATE TABLE IF NOT EXISTS civilizations (
+  id        SERIAL PRIMARY KEY,
+  name      TEXT,
+  homeworld INTEGER,
+  key       TEXT
 );
 
-
-DROP TABLE IF EXISTS systems CASCADE;
 CREATE TABLE IF NOT EXISTS systems (
   id         SERIAL PRIMARY KEY,
   status     SYSTEM_STATUS NOT NULL DEFAULT 'active' :: SYSTEM_STATUS,
   mode       BEAM_MODE     NOT NULL DEFAULT 'transit' :: BEAM_MODE,
   controller INTEGER                DEFAULT NULL,
   production INTEGER                DEFAULT 1 CHECK (production > 0),
-  tuning     TUNING_PARAMS NOT NULL DEFAULT ROW (0, 0) :: TUNING_PARAMS
+  tuning     INTEGER       NOT NULL DEFAULT 0
 ) WITH OIDS;
 
-
-DROP TABLE IF EXISTS routes CASCADE;
 CREATE TABLE IF NOT EXISTS routes (
   id          SERIAL PRIMARY KEY,
   origin      INTEGER NOT NULL REFERENCES systems (id),
@@ -32,82 +43,22 @@ CREATE TABLE IF NOT EXISTS routes (
 );
 
 
-DROP TABLE IF EXISTS civilizations CASCADE;
-CREATE TABLE IF NOT EXISTS civilizations (
-  id        SERIAL PRIMARY KEY,
-  name      TEXT    NOT NULL,
-  homeworld INTEGER NOT NULL REFERENCES systems (id),
-  token     TEXT    NOT NULL
-) WITH OIDS;
-
-
 ALTER TABLE systems
   ADD FOREIGN KEY (controller) REFERENCES civilizations (id);
 
 
-DROP TYPE IF EXISTS SHIP_STATUS;
-CREATE TYPE SHIP_STATUS AS ENUM ('active', 'destroyed');
+ALTER TABLE civilizations
+  ADD FOREIGN KEY (homeworld) REFERENCES systems (id);
 
 
-DROP TABLE IF EXISTS ships CASCADE;
 CREATE TABLE IF NOT EXISTS ships (
   id       SERIAL PRIMARY KEY,
   shipyard INTEGER NOT NULL REFERENCES systems (id),
   location INTEGER REFERENCES systems (id),
   flag     INTEGER NOT NULL REFERENCES civilizations (id)
-) WITH OIDS;
-
-
-DROP TABLE IF EXISTS civilizations CASCADE;
-CREATE TABLE IF NOT EXISTS civilizations (
-  id           SERIAL PRIMARY KEY,
-  namer        INTEGER NOT NULL REFERENCES civilizations (id),
-  civilization INTEGER NOT NULL REFERENCES civilizations (id),
-  name         TEXT    NOT NULL
 );
 
 
-DROP TABLE IF EXISTS systems CASCADE;
-CREATE TABLE IF NOT EXISTS systems (
-  id     SERIAL PRIMARY KEY,
-  namer  INTEGER NOT NULL REFERENCES civilizations (id),
-  system INTEGER NOT NULL REFERENCES systems (id),
-  name   TEXT    NOT NULL
-);
-
-
-DROP TABLE IF EXISTS ships CASCADE;
-CREATE TABLE IF NOT EXISTS ships (
-  id    SERIAL PRIMARY KEY,
-  namer INTEGER NOT NULL REFERENCES civilizations (id),
-  ship  INTEGER NOT NULL REFERENCES ships (id),
-  name  TEXT    NOT NULL
-);
-
-
-DROP TYPE IF EXISTS ORDER_STATUS CASCADE;
-CREATE TYPE ORDER_STATUS AS ENUM ('pending');
-
-
-DROP TABLE IF EXISTS systems CASCADE;
-CREATE TABLE IF NOT EXISTS systems (
-  id      SERIAL PRIMARY KEY,
-  system  INTEGER      NOT NULL REFERENCES systems (id),
-  status  ORDER_STATUS NOT NULL DEFAULT 'pending' :: ORDER_STATUS,
-  payload JSONB        NOT NULL
-);
-
-
-DROP TABLE IF EXISTS ships CASCADE;
-CREATE TABLE IF NOT EXISTS ships (
-  id      SERIAL PRIMARY KEY,
-  ship    INTEGER      NOT NULL REFERENCES ships (id),
-  status  ORDER_STATUS NOT NULL DEFAULT 'pending' :: ORDER_STATUS,
-  payload JSONB        NOT NULL
-);
-
-
-DROP TABLE IF EXISTS build CASCADE;
 CREATE TABLE IF NOT EXISTS build (
   id       SERIAL PRIMARY KEY,
   system   INTEGER                  NOT NULL REFERENCES systems (id),
@@ -116,7 +67,7 @@ CREATE TABLE IF NOT EXISTS build (
   time     TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
 );
 
-DROP TABLE IF EXISTS warp CASCADE;
+
 CREATE TABLE IF NOT EXISTS warp (
   id          SERIAL PRIMARY KEY,
   origin      INTEGER                  NOT NULL REFERENCES systems (id),
@@ -125,17 +76,17 @@ CREATE TABLE IF NOT EXISTS warp (
   time        TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
 );
 
-DROP TABLE IF EXISTS beam_transit CASCADE;
+
 CREATE TABLE IF NOT EXISTS beam_transit (
   id          SERIAL PRIMARY KEY,
   ship        INTEGER                  NOT NULL REFERENCES ships (id),
   origin      INTEGER                  NOT NULL REFERENCES systems (id),
   destination INTEGER                  NOT NULL REFERENCES systems (id),
-  tuning      TUNING_PARAMS            NOT NULL,
+  tuning      INTEGER                  NOT NULL,
   time        TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
 );
 
-DROP TABLE IF EXISTS ftl_transit CASCADE;
+
 CREATE TABLE IF NOT EXISTS ftl_transit (
   id          SERIAL PRIMARY KEY,
   ship        INTEGER                  NOT NULL REFERENCES ships (id),
@@ -145,11 +96,6 @@ CREATE TABLE IF NOT EXISTS ftl_transit (
 );
 
 
-DROP TYPE IF EXISTS TRANSIT_TYPE CASCADE;
-CREATE TYPE TRANSIT_TYPE AS ENUM ('beam', 'ftl');
-
-
-DROP VIEW IF EXISTS transit;
 CREATE OR REPLACE VIEW transit AS (
   SELECT
     'beam_transit' :: REGCLASS AS type,
@@ -170,10 +116,9 @@ CREATE OR REPLACE VIEW transit AS (
   FROM ftl_transit
 );
 
-
-DROP TABLE IF EXISTS attack CASCADE;
 CREATE TABLE IF NOT EXISTS attack (
-  id   SERIAL PRIMARY KEY,
-  ship INTEGER                  NOT NULL REFERENCES ships (id),
-  time TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
+  id     SERIAL PRIMARY KEY,
+  ship   INTEGER                  NOT NULL REFERENCES ships (id),
+  target INTEGER REFERENCES civilizations (id),
+  time   TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
 );
