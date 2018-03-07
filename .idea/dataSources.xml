@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
-    <data-source source="LOCAL" name="codeordie@localhost" uuid="349e3325-49a4-45ab-bd08-9febdb1c5528">
+    <data-source source="LOCAL" name="test@localhost" uuid="8f8d2ec0-bac9-4c10-a504-5bda424c3a81">
       <driver-ref>postgresql</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.postgresql.Driver</jdbc-driver>
-      <jdbc-url>jdbc:postgresql://localhost:5432/codeordie</jdbc-url>
+      <jdbc-url>jdbc:postgresql://localhost:5432/test</jdbc-url>
       <driver-properties>
         <property name="ApplicationName" value="DataGrip" />
       </driver-properties>

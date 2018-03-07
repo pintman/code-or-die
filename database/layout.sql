@@ -32,20 +32,21 @@ CREATE TABLE IF NOT EXISTS systems (
   mode       BEAM_MODE     NOT NULL DEFAULT 'transit' :: BEAM_MODE,
   controller INTEGER                DEFAULT NULL,
   production INTEGER                DEFAULT 1 CHECK (production > 0),
-  tuning     INTEGER       NOT NULL DEFAULT 0
+  tuning     INTEGER       NOT NULL DEFAULT 0,
+  names      TEXT ARRAY             DEFAULT '{}',
+  orders     JSONB                  DEFAULT '[]'
 ) WITH OIDS;
 
 CREATE TABLE IF NOT EXISTS routes (
   id          SERIAL PRIMARY KEY,
   origin      INTEGER NOT NULL REFERENCES systems (id),
-  destination INTEGER NOT NULL REFERENCES systems (id),
+  destination INTEGER NOT NULL REFERENCES systems (id) CHECK (destination > origin),
   distance    INTEGER NOT NULL CHECK (distance > 0)
 );
 
 
 ALTER TABLE systems
   ADD FOREIGN KEY (controller) REFERENCES civilizations (id);
-
 
 ALTER TABLE civilizations
   ADD FOREIGN KEY (homeworld) REFERENCES systems (id);
@@ -55,7 +56,8 @@ CREATE TABLE IF NOT EXISTS ships (
   id       SERIAL PRIMARY KEY,
   shipyard INTEGER NOT NULL REFERENCES systems (id),
   location INTEGER REFERENCES systems (id),
-  flag     INTEGER NOT NULL REFERENCES civilizations (id)
+  flag     INTEGER NOT NULL REFERENCES civilizations (id),
+  orders   JSONB ARRAY
 );
 
 
