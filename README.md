@@ -202,25 +202,22 @@ GET all information for all units controlled by team.
 
 `http GET ship/<id:int>`
 GET all information for a given ship controlled by team. Information includes:
-- ship convenience name
+- ship id
 - ship location
 - queue of ship orders
 - ship status (live/destroyed)
 - all messages sent to this ship
 
-`http PUT ship/<id:int>/name`
-PUT a convenience name on a ship. Ship does not have to be active to be given a convenience name.
-
-`http GET ship/<id:int|name:str>/orders`
+`http GET ship/<id:int>/orders`
 GET ship's order queue.
 
-`http PUT ship/<id:int|name:str>/orders`
+`http PUT ship/<id:int>/orders`
 PUT a new order into at the end of a ship's order queue.
 
-`http DELETE ship/<id:int|name:str>/orders`
+`http DELETE ship/<id:int>/orders`
 DELETE (clear) all orders from ship's order queue.
 
-`http DELETE ship/<id:int|name:str>/orders/<order:int>`
+`http DELETE ship/<id:int>/orders/<order:int>`
 DELETE specified order from ship's order queue.
 
 ### solar system outpost order payloads:
