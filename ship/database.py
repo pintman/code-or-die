@@ -12,6 +12,16 @@ def get_ship(db, key, ship):
         return ship[0]
 
 
+def get_all_ships(db, key):
+    ships = db.query_formatted("SELECT * FROM ships WHERE flag = %s",
+                              (get_civ(db, key),)
+                              ).dictresult()
+    if not ships:
+        return None
+    else:
+        return ships
+
+
 def get_ship_orders(db, key, ship):
     ship = get_ship(db, key, ship)
     if ship is None:

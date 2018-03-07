@@ -23,8 +23,8 @@ def remove_order_from_ship(db, key, ship, order_index):
 
 
 def get_ships(db, key):
-    pass
+    return get_all_ships(db, key)
 
 
 def get_ship_info(db, key, ship):
-    pass
+    return get_ship(db, key, ship)

@@ -1,6 +1,7 @@
 from common.test import db
 from ship.operations import *
 
+
 def test_sending_ship_orders(db):
     order1 = {"order": "attack", "civ": ["mars"]}
     order2 = {"order": "sieze"}
@@ -23,10 +24,21 @@ def test_sending_ship_orders(db):
     assert get_orders_from_ship(db, "key1", 1) == []
 
 
-
 def test_get_ships(db):
-    pass
+    key1ships = get_ships(db, "key1")
+    expected1 = [{"id": 1, "shipyard": 1, "location": 1, "flag": 1, "orders": []},
+                {"id": 2, "shipyard": 1, "location": 1, "flag": 1, "orders": []},
+                {"id": 3, "shipyard": 1, "location": 4, "flag": 1, "orders": []}]
+    assert key1ships == expected1
+
+    key3ships = get_ships(db, "key3")
+    expected3 = [{"id": 4, "shipyard": 3, "location": 4, "flag": 3, "orders": []}]
+    assert key3ships == expected3
+
+
+    assert get_ships(db, "no such key") == None
 
 
 def test_get_ship_info(db):
-    pass
+    assert get_ship_info(db, "key1", 1) == {"id": 1, "shipyard": 1, "location": 1, "flag": 1, "orders": []}
+    assert get_ship_info(db, "key1", 4) == None
