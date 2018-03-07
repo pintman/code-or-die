@@ -57,7 +57,7 @@ CREATE TABLE IF NOT EXISTS ships (
   shipyard INTEGER NOT NULL REFERENCES systems (id),
   location INTEGER REFERENCES systems (id),
   flag     INTEGER NOT NULL REFERENCES civilizations (id),
-  orders   JSONB ARRAY
+  orders   JSONB DEFAULT '[]'
 );
 
 

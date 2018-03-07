@@ -67,24 +67,26 @@ def _remove_order_from_system(system, order_index):
     return remove_order_from_system(app.db, key, system, order_index)
 
 
-@app.route("ship/<ship>/orders/", methods=["GET", "PUT", "DELETE"])
-def _remove_all_orders_from_ship(ship):
+@app.route("ship/<ship>/orders/<order>", methods=["GET", "PUT", "DELETE"])
+def _remove_all_orders_from_ship(ship, order=None):
     key = extract_key(request)
     if request.method == "GET":
-        return get_methods_from_ship(app.db, key, ship)
+        return get_orders_from_ship(app.db, key, ship)
     elif request.method == "PUT":
-        return add_order_to_ship(app.db, key, ship)
+        return add_order_to_ship(app.db, key, order, ship)
     elif request.method == "DELETE":
         return remove_all_orders_from_ship(app.db, key, ship)
 
 
 @app.route("system/<ship>/orders/<order_index>", methods=["DELETE"])
 def _remove_order_from_ship(ship, order_index):
-    return remove_order_from_ship(app.db, ship, order_index)
+    key = extract_key(request)
+    return remove_order_from_ship(app.db, key, ship, order_index)
 
 
 @app.route("ships", methods=["GET"])
 def _get_ships():
+    key = extract_key(request)
     return get_ships(app.db, key)
 
 

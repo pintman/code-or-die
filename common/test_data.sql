@@ -19,11 +19,11 @@ INSERT INTO civilizations (id, name, homeworld, key) VALUES
   (2, 'mars', 2, 'key2'),
   (3, 'venus', 3, 'key3');
 
-INSERT INTO ships (shipyard, location, flag) VALUES
-  (1, 1, 1),
-  (1, 1, 1),
-  (1, 4, 1),
-  (3, 4, 1);
+INSERT INTO ships (id, shipyard, location, flag) VALUES
+  (1, 1, 1, 1),
+  (2, 1, 1, 1),
+  (3, 1, 4, 1),
+  (4, 3, 4, 1);
 
 
 UPDATE systems

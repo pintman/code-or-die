@@ -221,7 +221,7 @@ DELETE (clear) all orders from ship's order queue.
 DELETE specified order from ship's order queue.
 
 ### solar system outpost order payloads:
-`{ "order": "build", "count": COUNT, "team": [TEAM, ...] }`
+`{ "order": "build", "count": COUNT, "civ": [TEAM, ...] }`
 produce count ship for specified teams (can produce ship for other teams)
 
 `{ "order": "repair-mode" }`
