@@ -1,6 +1,6 @@
 from make_app import make_app
 from flask import request
-from team import *
+from civilization import *
 from system import *
 from ship import *
 
@@ -20,7 +20,7 @@ def _rules_summary():
 
 
 @app.route("reset-api-key/<new_key>", methods=["POST"])
-# Updates the ket for a team
+# Updates the ket for a civilization
 def _set_token_for_team(new_key):
     old_key = extract_key(request)
     return set_token_for_team(app.db, old_key, new_key)

@@ -1,6 +1,6 @@
 """Functions related to system management"""
 
-from database.civilizations import get_civ, civ_owns
+from civilization.database import get_civ, civ_owns
 
 
 def system_info(db, key, system):

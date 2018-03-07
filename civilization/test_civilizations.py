@@ -1,11 +1,4 @@
-from io import StringIO
-
-import pytest
-import sys
-from database.test_common import db
-
-
-from database.civilizations import *
+from civilization.database import *
 
 
 

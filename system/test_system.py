@@ -1,8 +1,3 @@
-from database.test_common import db
-import pg
-from system import *
-
-
 def test_system_info(db):
     # Right permissions
     assert system_info(db, "key1", 1) is not None
