@@ -1,3 +1,6 @@
+from common.test import db
+from system.operations import *
+
 def test_system_info(db):
     # Right permissions
     assert system_info(db, "key1", 1) is not None
@@ -20,9 +23,9 @@ def test_system_info(db):
 
 
 def test_system_id_from_name(db):
-    assert system_id_from_name(db, "home") == 3
-    assert system_id_from_name(db, "venus") == 3
-    assert system_id_from_name(db, "war") == 4
+    assert get_system_by_name(db, "home") == get_system_by_id(db, 3)
+    assert get_system_by_name(db, "venus") == get_system_by_id(db, 3)
+    assert get_system_by_name(db, "war") == get_system_by_id(db, 4)
 
 
 def test_get_system_convenience_names(db):
@@ -68,14 +71,38 @@ def test_system_orders_is_none_when_no_system(db):
 
 
 def test_add_system_orders(db):
+    order = {"order": "repair-mode"}
     assert system_orders(db, "key1", 1) == []
-    add_order_to_system(db, "key1", 1, {"order", "repair-mode"})
-    assert system_orders(db, "key1", 1) == [{"order": "repair-mode"}]
+    assert add_order_to_system(db, "key1", 1, order) == [order]
+    assert system_orders(db, "key1", 1) == [order]
 
+def test_set_system_orders(db):
+    order = {"order": "repair-mode"}
+    assert get_system_orders(db, "key1", 1) == []
+    set_system_orders(db, "key1", 1, [order])
+    assert get_system_orders(db, "key1", 1) == [order]
+
+
+def test_get_system_orders(db):
+    assert get_system_orders(db, "key1", 1) == []
 
 def test_remove_all_orders_from_system(db):
-    pass
+    order = {"order": "repair-mode"}
+    assert get_system_orders(db, "key1", 1) == []
+    set_system_orders(db, "key1", 1, [order])
+    assert get_system_orders(db, "key1", 1) == [order]
+    remove_all_orders_from_system(db, "key1", 1)
+    assert get_system_orders(db, "key1", 1) == []
 
 
 def test_remove_order_from_system(db):
-    pass
+    order1 = {"order": "repair-mode"}
+    order2 = {"order": "transit-mode"}
+
+    assert get_system_orders(db, "key1", 1) == []
+    set_system_orders(db, "key1", 1, [order1, order2])
+    assert get_system_orders(db, "key1", 1) == [order1, order2]
+    remove_order_from_system(db, "key1", 1, 0)
+    assert get_system_orders(db, "key1", 1) == [order2]
+
+

@@ -1,5 +1,5 @@
 from civilization.database import *
-
+from common.test import db
 
 
 def test_get_civ(db):
@@ -32,3 +32,16 @@ def test_civ_owns(db):
     assert not civ_owns(db, 1, 3)
     assert civ_owns(db, 1, 4)
 
+def test_civ_can_see(db):
+    assert civ_can_see(db, "key1", 1)
+    assert civ_can_see(db, "key1", 4)
+    assert civ_can_see(db, "key2", 2)
+    assert civ_can_see(db, "key3", 3)
+
+def test_civ_can_see_invalid_civ(db):
+    assert not civ_can_see(db, "notakey", 1)
+    assert not civ_can_see(db, "no", 1)
+
+def test_civ_can_see_invalid_system(db):
+    assert not civ_can_see(db, "key1", 5)
+    assert not civ_can_see(db, "key3", 5)

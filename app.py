@@ -1,8 +1,8 @@
 from make_app import make_app
 from flask import request
-from civilization import *
-from system import *
-from ship import *
+from civilization.operations import *
+from system.operations import *
+from ship.operations import *
 
 
 app = make_app()
