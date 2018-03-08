@@ -1,6 +1,6 @@
 """Functions related to team management"""
 
-from civilization.database import get_civ, set_civ_key, civ_systems
+from database.key_access import get_civ, set_civ_key, civ_systems
 
 
 def set_token_for_team(db, old_key, new_key):

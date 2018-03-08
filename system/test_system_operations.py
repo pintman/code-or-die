@@ -1,4 +1,4 @@
-from common.test import db
+from test.fixtures import db
 from system.operations import *
 
 def test_system_info(db):
@@ -20,13 +20,6 @@ def test_system_info(db):
         "names": ["name1", "name2"],
         "orders": []
     }
-
-
-def test_system_id_from_name(db):
-    assert get_system_by_name(db, "home") == get_system_by_id(db, 3)
-    assert get_system_by_name(db, "venus") == get_system_by_id(db, 3)
-    assert get_system_by_name(db, "war") == get_system_by_id(db, 4)
-
 
 def test_get_system_convenience_names(db):
     assert get_system_convenience_names(db, 1) == []

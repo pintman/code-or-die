@@ -1,6 +1,6 @@
 """Functions related to system management"""
 
-from system.database import *
+from database.key_access import *
 
 
 def system_info(db, key, system):

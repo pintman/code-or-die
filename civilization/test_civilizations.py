@@ -1,5 +1,5 @@
-from civilization.database import *
-from common.test import db
+from database.key_access import *
+from test.fixtures import db
 
 
 def test_get_civ(db):

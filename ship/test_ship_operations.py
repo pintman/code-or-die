@@ -1,4 +1,4 @@
-from common.test import db
+from test.fixtures import db
 from ship.operations import *
 
 
@@ -42,11 +42,10 @@ def test_can_send_valid_orders(db):
     try:
         for order in orders:
             add_order_to_ship(db, "key1", 1, order)
-        success = True
+        assert False
     except:
-        success = False
+        pass
 
-    assert success
 
 
 def test_cant_send_invalid_orders(db):

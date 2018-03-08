@@ -1,5 +1,5 @@
 """Functions related to ship management"""
-from ship.database import *
+from database.key_access import *
 
 
 def get_orders_from_ship(db, key, ship):

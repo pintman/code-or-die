@@ -1,5 +1,5 @@
-from common.test import db
-from ship.database import *
+from test.fixtures import db
+from database.key_access import *
 
 
 def test_get_ship(db):
