@@ -1,4 +1,4 @@
-
+from database.common import *
 
 def get_transits(db):
     """
@@ -14,11 +14,12 @@ def get_route_distance(db, system1, system2):
     id2 = system_to_id(db, system2)
     result = db.query_formatted(
         "SELECT distance FROM routes WHERE origin = %s AND destination = %s",
-        (min(id1, id2), max(id1, id2))).dictresult()
-    if len(result) == 0:
+        (min(id1, id2), max(id1, id2)))
+    result = result_to_first_element(result)
+    if result is None:
         return None
     else:
-        return result[0]["distance"]
+        return result["distance"]
 
 
 def remove_transit(db, id, type):

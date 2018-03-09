@@ -1,5 +1,5 @@
 import pg
-from database.common import system_to_id
+from database.common import *
 
 
 def get_civ(db, key):
@@ -97,7 +97,7 @@ def civ_has_ships_at(db, key, system):
     return len(result.dictresult())
 
 
-def get_ship(db, key, ship):
+def get_ship_for_civ(db, key, ship):
     """Gets information on the ship by the given id, if the civ for the given key can see it.
 
     :param db: the database to check
@@ -114,7 +114,7 @@ def get_ship(db, key, ship):
         return ship[0]
 
 
-def get_all_ships(db, key):
+def get_ships_for_civ(db, key):
     """Gets all the ships owned by the given civilization.
 
     :param db: the database to check
@@ -138,7 +138,7 @@ def get_ship_orders(db, key, ship):
     :param ship: the ship to check
     :return: the orders, if the ship exists and the civ can see it
     """
-    ship = get_ship(db, key, ship)
+    ship = get_ship_for_civ(db, key, ship)
     if ship is None:
         return None
     else:
@@ -180,7 +180,7 @@ def _get_system_by_id(db, system_id):
     :return: the system, or None if there isn't one
     """
     result = db.query_formatted("SELECT * FROM systems WHERE id = %s", (system_id,))
-    return _result_to_first_element(result)
+    return result_to_first_element(result)
 
 
 def _get_system_by_name(db, name):
@@ -191,20 +191,7 @@ def _get_system_by_name(db, name):
     :return: the system, or None if there isn't one
     """
     result = db.query_formatted("SELECT * FROM systems WHERE %s = ANY(names)", (name,))
-    return _result_to_first_element(result)
-
-
-def _result_to_first_element(result):
-    """Turns a database query result into a single element
-
-    :param result: the result to use
-    :return: the first element, or none if it is empty
-    """
-    d = result.dictresult()
-    if len(d) == 0:
-        return None
-    else:
-        return d[0]
+    return result_to_first_element(result)
 
 
 def get_system_orders(db, key, system):
