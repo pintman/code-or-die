@@ -86,3 +86,9 @@ def routes_from(db, id):
         distance = route["distance"]
         out.append({"destination": destination, "distance": distance})
     return out
+
+
+def get_system(db, system):
+    result = db.query_formatted("SELECT * FROM systems WHERE id = %s",
+                                (system_to_id(db, system),))
+    return result_to_first_element(result)

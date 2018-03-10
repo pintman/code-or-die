@@ -8,9 +8,9 @@ def get_orders_from_ship(db, key, ship):
 
 def add_order_to_ship(db, key, ship, order):
     if not is_valid_ship_order(order):
-        raise NotImplementedError("Invalid Order")
+        return False
 
-    orders = get_ship_orders(db, key, ship)
+    orders = get_ship_orders(db, key, ship) or []
     orders.append(order)
     return set_ship_orders(db, key, ship, orders)
 

@@ -47,7 +47,6 @@ def test_can_send_valid_orders(db):
         pass
 
 
-
 def test_cant_send_invalid_orders(db):
     order_attack_none = {"order": "attack", "civ": []}
     order_not_in_list = {"order": "foo"}
@@ -62,11 +61,7 @@ def test_cant_send_invalid_orders(db):
               order_beam_without_either]
 
     for order in orders:
-        try:
-            add_order_to_ship(db, "key1", 1, order)
-            assert order is False
-        except NotImplementedError as e:
-            assert True
+        assert add_order_to_ship(db, "key1", 1, order) is False
 
 
 def test_get_ships(db):

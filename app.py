@@ -11,8 +11,12 @@ from apscheduler.schedulers.background import BackgroundScheduler
 
 app = make_app()
 
+
 def extract_key(request):
-    return request.headers["api-key"]
+    try:
+        return request.headers["api-key"]
+    except KeyError or IndexError as e:
+        return None
 
 
 @app.route("/", methods=["GET"])
@@ -45,44 +49,42 @@ def _get_system_convenience_names(system):
     return jsonify(get_system_convenience_names(app.db, system))
 
 
-@app.route("/systems/<system>/<new_convenience_name>", methods=["POST"])
+@app.route("/systems/<system>/add-name/<new_convenience_name>", methods=["POST"])
 def _add_convenience_name(system, new_convenience_name):
     return jsonify(add_convenience_name(app.db, system, new_convenience_name))
 
 
-@app.route("/system/<system>/orders", methods=["GET", "POST"])
+@app.route("/system/<system>/orders", methods=["GET", "POST", "DELETE"])
 def _system_orders(system):
     key = extract_key(request)
     if request.method == "GET":
         return jsonify(system_orders(app.db, key, system))
     if request.method == "POST":
-        order = request.get_json()["order"]
+        order = request.get_json(force=True)
         return jsonify(add_order_to_system(app.db, key, system, order))
+    if request.method == "DELETE":
+        return jsonify(remove_all_orders_from_system(app.db, key, system))
 
 
-@app.route("/system/<system>/orders/", methods=["DELETE"])
-def _remove_all_orders_from_system(system, order_index):
-    return jsonify(remove_all_orders_from_system(app.db, system, order_index))
-
-
-@app.route("/system/<system>/orders/<order_index>", methods=["DELETE"])
+@app.route("/system/<system>/orders/<int:order_index>", methods=["DELETE"])
 def _remove_order_from_system(system, order_index):
     key = extract_key(request)
     return jsonify(remove_order_from_system(app.db, key, system, order_index))
 
 
-@app.route("/ship/<ship>/orders/<order>", methods=["GET", "PUT", "DELETE"])
-def _remove_all_orders_from_ship(ship, order=None):
+@app.route("/ship/<ship>/orders", methods=["GET", "POST", "DELETE"])
+def _remove_all_orders_from_ship(ship):
     key = extract_key(request)
     if request.method == "GET":
         return jsonify(get_orders_from_ship(app.db, key, ship))
-    elif request.method == "PUT":
-        return jsonify(add_order_to_ship(app.db, key, order, ship))
+    elif request.method == "POST":
+        order = request.get_json(force=True)
+        return jsonify(add_order_to_ship(app.db, key, ship, order))
     elif request.method == "DELETE":
         return jsonify(remove_all_orders_from_ship(app.db, key, ship))
 
 
-@app.route("/system/<ship>/orders/<order_index>", methods=["DELETE"])
+@app.route("/system/<ship>/orders/<int:order_index>", methods=["DELETE"])
 def _remove_order_from_ship(ship, order_index):
     key = extract_key(request)
     return jsonify(remove_order_from_ship(app.db, key, ship, order_index))

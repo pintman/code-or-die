@@ -12,30 +12,32 @@ def make_client():
 
 @pytest.fixture
 def get():
-    client = make_client()
-
-    def _get(url, headers=None, **kwargs):
-        final_headers = {"API_KEY": "key1"}
-        final_headers.update(headers or {})
-        response = client.get(url, headers=final_headers, **kwargs)
-        return json.loads(response.data)
-
-    return _get
+    return http_action_fixture(lambda client, url, **kwargs: client.get(url, **kwargs))
 
 
 @pytest.fixture
 def post():
+    return http_action_fixture(lambda client, url, **kwargs: client.post(url, **kwargs))
+
+
+@pytest.fixture
+def delete():
+    return http_action_fixture(lambda client, url, **kwargs: client.delete(url, **kwargs))
+
+
+def http_action_fixture(client_func):
     client = make_client()
 
-    def _post(url, headers=None, data=None, **kwargs):
+    def action(url, headers=None, data=None, **kwargs):
         final_headers = {"api-key": "key1", "content-type": "application/json"}
         final_headers.update(headers or {})
         kwargs.update({"headers": final_headers})
-        kwargs.update({"data": json.dumps(data)})
-        response = client.post(url, **kwargs)
+        if data:
+            kwargs.update({"data": json.dumps(data)})
+        response = client_func(client, url, **kwargs)
         return json.loads(response.data)
 
-    return _post
+    return action
 
 
 def test_set_api_key(get, post):
@@ -58,6 +60,7 @@ def test_get_systems(get):
 
 def test_systems_specific(get):
     assert get("/systems/1") == {
+        "id": 1,
         'armies': {"earth": 2},
         'controller': 1,
         'names': [],
@@ -67,6 +70,7 @@ def test_systems_specific(get):
     }
     assert get("/systems/2") == None
     assert get("/systems/4") == {
+        "id": 4,
         'armies': {"earth": 1, "venus": 1},
         'controller': 1,
         'names': ["war"],
@@ -78,4 +82,71 @@ def test_systems_specific(get):
     }
 
 
-pytest.main(["-vv"])
+def test_system_names(get):
+    assert get("/systems/names/3", {"api-key": "doesn't matter"}) == ["home", "venus"]
+    assert get("/systems/names/1", {"api-key": "doesn't matter"}) == []
+    assert get("/systems/names/12345", {"api-key": "doesn't matter"}) == None
+
+
+def test_system_put_convenience_name(get, post):
+    assert get("/systems/names/1", {"api-key": "doesn't matter"}) == []
+    assert post("/systems/1/add-name/planet", {"api-key": "doesn't matter"}) == None
+    assert get("/systems/names/1", {"api-key": "doesn't matter"}) == ["planet"]
+
+
+def test_system_orders(get, post, delete):
+    order1 = {"order": "repair-mode"}
+    order2 = {"order": "transit-mode"}
+    order3 = {"order": "abandon"}
+    order4 = {"order": "build", "count": 1, "civ": [1]}
+
+    def system_1_orders():
+        return get("/system/1/orders")
+
+    assert system_1_orders() == []
+    post("/system/1/orders", data=order1)
+    assert system_1_orders() == [order1]
+
+    post("/system/1/orders", data=order2)
+    assert system_1_orders() == [order1, order2]
+
+    post("/system/1/orders", data=order3)
+    assert system_1_orders() == [order1, order2, order3]
+
+    post("/system/1/orders", data=order4)
+    assert system_1_orders() == [order1, order2, order3, order4]
+
+    delete("/system/1/orders/1")
+    assert system_1_orders() == [order1, order3, order4]
+
+    delete("/system/1/orders")
+    assert system_1_orders() == []
+
+
+def test_ship_orders(get, post):
+    order1 = {"order": "suicide"}
+
+    assert get("/ship/1/orders") == []
+    post("/ship/1/orders", data=order1)
+    assert get("/ship/1/orders") == [order1]
+
+
+def test_get_ships(get, post):
+    assert get("/ships") == [
+        {'flag': 1, 'id': 1, 'location': 1, 'orders': [], 'shipyard': 1},
+        {'flag': 1, 'id': 2, 'location': 1, 'orders': [], 'shipyard': 1},
+        {'flag': 1, 'id': 3, 'location': 4, 'orders': [], 'shipyard': 1}
+    ]
+
+    assert get("/ships", {"api-key": "key2"}) == []
+
+    assert get("/ships", {"api-key": "key3"}) == [
+        {'flag': 3, "id": 4, "location": 4, "orders": [], "shipyard": 3}
+    ]
+
+    assert post("/ship/4/orders",
+                headers={"api-key": "key3"},
+                data={"order": "suicide"}) is True
+    assert get("/ships", {"api-key": "key3"}) == [
+        {'flag': 3, "id": 4, "location": 4, "orders": [{"order": "suicide"}], "shipyard": 3}
+    ]

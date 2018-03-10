@@ -12,7 +12,7 @@ def system_info(db, key, system):
     :param system: the system to get information about
     :return: all available information about the system, or None if there is none
     """
-    return get_system(db, key, system)
+    return get_system_info(db, key, system)
 
 
 def get_system_convenience_names(db, system_id):

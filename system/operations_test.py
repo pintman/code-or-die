@@ -8,18 +8,6 @@ def test_system_info(db):
     assert system_info(db, "key1", 3) is None
     assert system_info(db, "key1", 4) is not None
 
-    db.query("INSERT INTO systems VALUES (5, 'active', 'transit', 1, 1, 0, '{\"name1\", \"name2\"}')")
-    # Right results
-    assert system_info(db, "key1", 5) == {
-        "id": 5,
-        "status": "active",
-        "mode": "transit",
-        "controller": 1,
-        "production": 1,
-        "tuning": 0,
-        "names": ["name1", "name2"],
-        "orders": []
-    }
 
 def test_get_system_convenience_names(db):
     assert get_system_convenience_names(db, 1) == []

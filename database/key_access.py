@@ -121,11 +121,15 @@ def get_ships_for_civ(db, key):
     :param key: the key to the civilization
     :return: all the ships
     """
+    civ = get_civ(db, key)
+    if not civ:
+        return None
+
     ships = db.query_formatted("SELECT * FROM ships WHERE flag = %s",
-                               (get_civ(db, key),)
+                               (civ,)
                                ).dictresult()
     if not ships:
-        return None
+        return []
     else:
         return ships
 
@@ -156,9 +160,10 @@ def set_ship_orders(db, key, ship, orders):
     """
     db.query_formatted("UPDATE ships SET orders = %s WHERE id = %s AND flag = %s",
                        (pg.jsonencode(orders), ship, get_civ(db, key)))
+    return True
 
 
-def get_system(db, key, system):
+def get_system_info(db, key, system):
     """Gets the system with the given id or name, if the civilization can see it
 
     :param db: the database to check
@@ -186,6 +191,7 @@ def get_system(db, key, system):
         owner_information = None
 
     return {
+        "id": system_id,
         "names": system_names,
         "controller": controller_id,
         "production": production,
@@ -226,7 +232,10 @@ def get_system_orders(db, key, system):
     :return: the orders for the system, or None if there is no system with the given name/id or you aren't allowed
     to see it
     """
-    sys = get_system(db, key, system)
+    if not civ_owns_by_key(db, key, system):
+        return None
+
+    sys = get_system(db, system)
     if sys is None:
         return None
     else:
@@ -242,7 +251,10 @@ def set_system_orders(db, key, system, orders):
     :param orders: the new set of orders
     :return: the old set of orders
     """
-    sys = get_system(db, key, system)
+    if not civ_owns_by_key(db, key, system):
+        return None
+
+    sys = get_system(db, system)
     if sys is None:
         return None
     db.query_formatted("UPDATE systems SET orders = %s WHERE id = %s",
