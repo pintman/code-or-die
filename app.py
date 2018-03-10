@@ -111,10 +111,17 @@ if __name__ == "__main__":
 
     # Set up the main game loop
     scheduler = BackgroundScheduler()
+
+    # Handling incoming ship orders
     scheduler.add_job(lambda: process_transits(app.db), 'interval', seconds=30)
     scheduler.add_job(lambda: process_attacks(app.db), 'interval', seconds=30)
-    # scheduler.add_job(lambda: process_ship_orders(app.db), 'interval', seconds=5)
-    # scheduler.add_job(lambda: process_system_orders(app.db), 'interval', minutes=1)
+    scheduler.add_job(lambda: process_system_siezure(app.db), 'interval', minutes=3)
+    scheduler.add_job(lambda: process_ship_suicides(app.db), 'interval', seconds=30)
+
+    # Handling incoming system orders
+
+
+    # Processing the database
 
     # Launch background tasks for game
     scheduler.start()

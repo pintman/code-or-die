@@ -255,7 +255,6 @@ attempt to seize control of solar system outpost currently stationed at
 `{ "order": "suicide" }`
 self-destruct
 
-**TODO**: send API key as header?
 **TODO**: can you tell if a solar system is destroyed other than by attempting to travel to it via FTL? What happens to the unit if the solar system is destroyed?
 
 TODO

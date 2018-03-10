@@ -1,4 +1,5 @@
 from database.common import *
+import pg
 
 def get_transits(db):
     """
@@ -33,3 +34,6 @@ def set_ship_location(db, ship_id, new_location):
     db.query_formatted("UPDATE ships SET location = %s WHERE id = %s",
                        (new_location, ship_id))
 
+def set_ship_orders(db, ship, orders):
+    db.query_formatted("UPDATE ships SET orders = %s WHERE id = %s",
+                       (pg.jsonencode(orders), ship))
