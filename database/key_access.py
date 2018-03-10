@@ -180,7 +180,7 @@ def get_system_info(db, key, system):
     system_names = system["names"]
     controller_id = system["controller"]
     production = system["production"]
-    armies = ships_at_system(db, system_id)
+    armies = army_sizes_at_system(db, system_id)
     routes = routes_from(db, system_id)
     if civ_owns(db, get_civ(db, key), system_id):
         owner_information = {

@@ -38,7 +38,7 @@ def result_to_first_element(result):
         return d[0]
 
 
-def ships_at_system(db, id):
+def army_sizes_at_system(db, id):
     """Produces the list of all civilizations with at least one ship, and how many
     ships they own.
 
@@ -46,18 +46,32 @@ def ships_at_system(db, id):
     :param id: the id of the system to find
     :return: the list
     """
-    ships = db.query_formatted("SELECT * FROM ships WHERE location = %s", (id,)).dictresult()
+    out = {}
+    for civ_id, ships in ships_at_system(db, id).items():
+        out[get_civ_name(db, civ_id)] = len(ships)
+    return out
+
+
+def ships_at_system(db, system_id):
+    """Creates a list of the ships at each system, as a dictionary from
+    civilization ids to a list of ship id's
+
+    :param db: the database to use
+    :param system_id: the id of the system to check
+    :return: the civilizations at the system, and which ships each one owns
+    """
+    ships = db.query_formatted("SELECT id, flag FROM ships WHERE location = %s", (system_id,)
+                               ).dictresult()
     armies = {}
     for ship in ships:
-        if ship["flag"] in armies:
-            armies[ship["flag"]] += 1
-        else:
-            armies[ship["flag"]] = 1
+        flag = ship["flag"]
+        id = ship["id"]
 
-    out = {}
-    for civ_id, num_ships in armies.items():
-        out[get_civ_name(db, civ_id)] = num_ships
-    return out
+        if flag in armies:
+            armies[flag].append(id)
+        else:
+            armies[flag] = [id]
+    return armies
 
 
 def get_civ_name(db, civ_id):

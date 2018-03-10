@@ -77,27 +77,32 @@ e.g., systems A, B, and C are connected A → B → C. To transit from A to C, a
 
 Ship actions belong to a queue (to facilitate multi-hop travel and complex actions.) Queued actions can be canceled.
 
-Ships can be instructed to participate in combat. Combat is locked to 30 second rounds. Combat occurs on a regiment-vs-regiment basis. Ship strength between combat parties is compared. Winner is party with greater strength of forces (in number of ships.) At end of combat round, loser loses 10% of total unit strength plus 10% for each double of attacker strength.
+Ships can be instructed to participate in combat. Combat is locked to 30 second rounds. Combat occurs on a regiment-vs-regiment basis. Ship strength between combat parties is compared. 
+Combat rounds occur in each system as follows:
+The civilization with the most ships that hasn't attacked yet this round goes.
+Each of their ships has a one in three chance to attack. If they do, they will choose randomly
+between each civilization they were told to target in the attack order.
+The process repeats until every civilization with at least one ship attacking has attacked.
 
-e.g., A and B engage in combat. A has 55 ships. B has 50 ships. A has more ships and is the winner. B has fewer ships and is the loser. B loses 10% of total unit strength (5 ships.) A has 55 ships remaining. B has 50-5=45 ships remaining.
-
-e.g., A and B engage in combat. A has 100 ships. B has 50 ships. A has more ships and is the winner. B has fewer ships and is the loser. B loses 10% of total unit strength (5 ships) and another 10% of total unit strength, because A has double the number of ships. A has 100 ships remaining. B has 50-5-5=40 ships remaining.
-
-**TODO:** can winner ever lose ships?
-**TODO:** how do we do >2 party combat?
 
 SOLAR SYSTEM OUTPOSTS
 ---------------------
 
-Solar system outposts can be controlled by teams. Teams can take control of any uncontrolled outpost. Teams can release control of any outpost at any time. Teams can contest control of an outpost currently controlled by another party.
+Solar system outposts can be controlled by teams. Teams can take control of any uncontrolled 
+outpost. Teams can release control of any outpost at any time. Teams can contest control of an 
+outpost currently controlled by another party.
 
-When contesting control of a system, the party with the most ships present gains control. Only the party controlling the system and the party contesting control are considered.
+When contesting control of a system, the party with the most ships present gains control. Only 
+the party controlling the system and the party contesting control are considered.
 
-**IDEA:** upon gaining control of an solar system outpost, controlling party can see beam tuning parameters for every previous transit.Can they also see all past transit records? This means teams will have to "hide" their homeworlds.
+**IDEA:** upon gaining control of an solar system outpost, controlling party can see beam tuning parameters for every
+ previous transit.Can they also see all past transit records? This means teams will have to "hide" their homeworlds.
 
-e.g., Team A controls New Earth II and has 100 ships stationed there. Team B, an ally, moves 10 ships to New Earth II. Team A can relase control of system. Team B can immediately take control of system, as it is uncontrolled. Team C moves 50 ships to New Earth II. Team C can contest and win control of New Earth II, because Team C has 50 ships vs current controlling Team B's 10 ships. Team A can immediately contest control from Team C, with team A winning, because it has the most ships.
+e.g., Team A controls New Earth II and has 100 ships stationed there. Team B, an ally, moves 10 ships to New Earth II
+. Team A can relase control of system. Team B can immediately take control of system, as it is uncontrolled. Team C moves 50 ships to New Earth II. Team C can contest and win control of New Earth II, because Team C has 50 ships vs current controlling Team B's 10 ships. Team A can immediately contest control from Team C, with team A winning, because it has the most ships.
 
-The team controlling a solar system outpost is allowed to change the outpost's beam tuning parameters at any time. (Note: you must know the tuning parameters for the source & destination beam motivators to safely travel between the two systems.)
+The team controlling a solar system outpost is allowed to change the outpost's beam tuning parameters at any time. 
+(Note: you must know the tuning parameters for the source & destination beam motivators to safely travel between the two systems.)
 
 BEAM MOTIVATORS
 ---------------
