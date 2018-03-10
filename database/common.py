@@ -1,3 +1,6 @@
+import pg
+
+
 def system_to_id(db, system):
     """What is the id of the given system? Accepts int-able strings,
     or converts a name into the id
@@ -106,3 +109,11 @@ def get_system(db, system):
     result = db.query_formatted("SELECT * FROM systems WHERE id = %s",
                                 (system_to_id(db, system),))
     return result_to_first_element(result)
+
+
+def set_system_orders(db, system, orders):
+    sys = get_system(db, system)
+    if sys is None:
+        return None
+    db.query_formatted("UPDATE systems SET orders = %s WHERE id = %s",
+                       (pg.jsonencode(orders), sys["id"]))

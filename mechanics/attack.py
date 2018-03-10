@@ -27,6 +27,7 @@ def process_ship_attack(db, ship_id, civs_in_system):
 
     ship = db.get("ships", ship_id)
     orders = ship["orders"]
+
     targets = [target for target in ship_targets(orders) if target in civs_in_system]
     if targets == []:
         return

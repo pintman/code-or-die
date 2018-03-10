@@ -1,11 +1,12 @@
 from make_app import make_app
 from flask import request, jsonify
-import json
 from civilization.operations import *
 from system.operations import *
 from ship.operations import *
 from mechanics.transit import process_transits
 from mechanics.attack import process_attacks
+from mechanics.ship_order import process_ship_orders
+from mechanics.system_order import process_system_orders
 
 from apscheduler.schedulers.background import BackgroundScheduler
 
@@ -115,11 +116,10 @@ if __name__ == "__main__":
     # Handling incoming ship orders
     scheduler.add_job(lambda: process_transits(app.db), 'interval', seconds=30)
     scheduler.add_job(lambda: process_attacks(app.db), 'interval', seconds=30)
-    scheduler.add_job(lambda: process_system_siezure(app.db), 'interval', minutes=3)
-    scheduler.add_job(lambda: process_ship_suicides(app.db), 'interval', seconds=30)
+    scheduler.add_job(lambda: process_ship_orders(app.db), 'interval', seconds=5)
 
     # Handling incoming system orders
-
+    scheduler.add_job(lambda: process_system_orders(app.db), 'interval', seconds=150)
 
     # Processing the database
 

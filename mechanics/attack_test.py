@@ -34,7 +34,7 @@ def test_attack(db):
     assert army_sizes_at_system(db, 5) == {"earth": 100, "venus": 100}
 
     process_attacks(db)
-    assert army_sizes_at_system(db, 5)["earth"] < 80
-    assert army_sizes_at_system(db, 5)["venus"] < 80
+    assert army_sizes_at_system(db, 5)["earth"] < 90
+    assert army_sizes_at_system(db, 5)["venus"] < 90
 
 

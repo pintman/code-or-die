@@ -21,7 +21,8 @@ def test_set_civ_key(db):
 
 
 def test_civ_systems(db):
-    assert civ_systems(db, "key1") == [1, 4]
+    assert 1 in civ_systems(db, "key1")
+    assert 4 in civ_systems(db, "key1")
     assert civ_systems(db, "key2") == [2]
     assert civ_systems(db, "key3") == [3]
 

@@ -60,7 +60,7 @@ def test_add_system_orders(db):
 def test_set_system_orders(db):
     order = {"order": "repair-mode"}
     assert get_system_orders(db, "key1", 1) == []
-    set_system_orders(db, "key1", 1, [order])
+    set_system_orders_by_key(db, "key1", 1, [order])
     assert get_system_orders(db, "key1", 1) == [order]
 
 
@@ -70,7 +70,7 @@ def test_get_system_orders(db):
 def test_remove_all_orders_from_system(db):
     order = {"order": "repair-mode"}
     assert get_system_orders(db, "key1", 1) == []
-    set_system_orders(db, "key1", 1, [order])
+    set_system_orders_by_key(db, "key1", 1, [order])
     assert get_system_orders(db, "key1", 1) == [order]
     remove_all_orders_from_system(db, "key1", 1)
     assert get_system_orders(db, "key1", 1) == []
@@ -81,7 +81,7 @@ def test_remove_order_from_system(db):
     order2 = {"order": "transit-mode"}
 
     assert get_system_orders(db, "key1", 1) == []
-    set_system_orders(db, "key1", 1, [order1, order2])
+    set_system_orders_by_key(db, "key1", 1, [order1, order2])
     assert get_system_orders(db, "key1", 1) == [order1, order2]
     remove_order_from_system(db, "key1", 1, 0)
     assert get_system_orders(db, "key1", 1) == [order2]

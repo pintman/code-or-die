@@ -242,7 +242,7 @@ def get_system_orders(db, key, system):
         return sys["orders"]
 
 
-def set_system_orders(db, key, system, orders):
+def set_system_orders_by_key(db, key, system, orders):
     """Sets the orders for a given system.
 
     :param db: the database to update

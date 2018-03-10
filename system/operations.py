@@ -65,7 +65,7 @@ def add_order_to_system(db, key, system, order):
     """
     new_orders = get_system_orders(db, key, system)
     new_orders.append(order)
-    set_system_orders(db, key, system, new_orders)
+    set_system_orders_by_key(db, key, system, new_orders)
     return new_orders
 
 
@@ -77,7 +77,7 @@ def remove_all_orders_from_system(db, key, system):
     :param system: the id of the system
     :return: the list of orders that used to be in the system
     """
-    return set_system_orders(db, key, system, [])
+    return set_system_orders_by_key(db, key, system, [])
 
 
 def remove_order_from_system(db, key, system, order_index):
@@ -91,4 +91,4 @@ def remove_order_from_system(db, key, system, order_index):
     """
     orders = get_system_orders(db, key, system)
     orders.remove(orders[order_index])
-    set_system_orders(db, key, system, orders)
+    set_system_orders_by_key(db, key, system, orders)

@@ -24,12 +24,13 @@ def test_ftl_transit_processing(db):
     assert transits()[0]["ship"] == 1
     assert transits()[0]["destination"] == 4
 
+
 def test_beam_transit_processing(db):
     def transits():
         return db.query("SELECT * FROM transit").dictresult()
 
     assert len(transits()) == 0
-    add_order(db, 1, {"order":"beam_transit", "origin": 1, "destination": 4, "tuning": 0})
+    add_order(db, 1, {"order": "beam_transit", "origin": 1, "destination": 4, "tuning": 0})
     assert len(transits()) == 0
 
     process_ship_orders(db)
@@ -46,6 +47,7 @@ def test_suicide_processing(db):
     assert len(ships()) == 4
     process_ship_orders(db)
     assert len(ships()) == 3
+
 
 def test_seizing_systems(db):
     from database.key_access import civ_systems
