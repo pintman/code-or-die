@@ -103,6 +103,7 @@ CREATE TABLE IF NOT EXISTS ftl_transit (
 CREATE OR REPLACE VIEW transit AS (
   SELECT
     'beam_transit' :: REGCLASS AS type,
+    id,
     ship,
     origin,
     destination,
@@ -112,6 +113,7 @@ CREATE OR REPLACE VIEW transit AS (
   UNION
   SELECT
     'ftl_transit' :: REGCLASS AS type,
+    id,
     ship,
     origin,
     destination,

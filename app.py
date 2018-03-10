@@ -8,7 +8,6 @@ from mechanics.transit import process_transits
 
 from apscheduler.schedulers.background import BackgroundScheduler
 
-
 app = make_app()
 
 
@@ -104,11 +103,11 @@ def _get_ship_info(ship_id):
 
 if __name__ == "__main__":
     import functools
+
     # Set up the main game loop
     scheduler = BackgroundScheduler()
     scheduler.add_job(lambda: process_transits(app.db), 'interval', minutes=1)
     # scheduler.add_job(process_ship_orders, 'interval', seconds=5)
-    # scheduler.add_job(process_system_orders, 'interval', minutes=1)
     # scheduler.add_job(process_system_orders, 'interval', minutes=1)
     scheduler.start()
     # Launch the api
