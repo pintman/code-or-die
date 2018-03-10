@@ -34,7 +34,9 @@ CREATE TABLE IF NOT EXISTS systems (
   production INTEGER                DEFAULT 1 CHECK (production > 0),
   tuning     INTEGER       NOT NULL DEFAULT 0,
   names      TEXT ARRAY             DEFAULT '{}',
-  orders     JSONB                  DEFAULT '[]'
+  orders     JSONB                  DEFAULT '[]',
+  historical_tuning INTEGER ARRAY DEFAULT '{}',
+  tuning_destinations INTEGER ARRAY DEFAULT '{}'
 ) WITH OIDS;
 
 CREATE TABLE IF NOT EXISTS routes (

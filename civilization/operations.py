@@ -24,4 +24,6 @@ def systems_for_team(db, key):
     :param key: the key of the civilization to check
     :return: the list of systems that the team owns
     """
-    return civ_systems(db, key)
+    result = civ_systems(db, key)
+    result.sort()
+    return result

@@ -169,8 +169,30 @@ def get_system(db, key, system):
     system_id = system_to_id(db, system)
     if system_id is None or not civ_can_see(db, key, system_id):
         return None
-    return _get_system_by_id(db, system_id)
 
+    system = _get_system_by_id(db, system_id)
+
+    system_names = system["names"]
+    controller_id = system["controller"]
+    production = system["production"]
+    armies = ships_at_system(db, system_id)
+    routes = routes_from(db, system_id)
+    if civ_owns(db, get_civ(db, key), system_id):
+        owner_information = {
+            "tuning-parameters": system["historical_tuning"],
+            "tuning_destinations": system["tuning_destinations"]
+        }
+    else:
+        owner_information = None
+
+    return {
+        "names": system_names,
+        "controller": controller_id,
+        "production": production,
+        "armies": armies,
+        "routes": routes,
+        "owner-information": owner_information
+    }
 
 def _get_system_by_id(db, system_id):
     """Gets the system with the given id.
@@ -192,6 +214,7 @@ def _get_system_by_name(db, name):
     """
     result = db.query_formatted("SELECT * FROM systems WHERE %s = ANY(names)", (name,))
     return result_to_first_element(result)
+
 
 
 def get_system_orders(db, key, system):

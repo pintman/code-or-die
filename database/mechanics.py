@@ -32,3 +32,4 @@ def remove_transit(db, id, type):
 def set_ship_location(db, ship_id, new_location):
     db.query_formatted("UPDATE ships SET location = %s WHERE id = %s",
                        (new_location, ship_id))
+
