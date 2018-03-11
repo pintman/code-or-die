@@ -15,4 +15,5 @@ def db():
 
     with open(abs_file_path) as test_data:
         database_connection.query(test_data.read(-1))
+
     return database_connection

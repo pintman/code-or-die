@@ -101,7 +101,7 @@ def routes_from(db, id):
     for route in routes:
         destination = [route["destination"] if route["origin"] == id else route["origin"]]
         distance = route["distance"]
-        out.append({"destination": destination, "distance": distance})
+        out.append({"destination": destination[0], "distance": distance})
     return out
 
 

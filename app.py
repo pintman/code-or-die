@@ -86,7 +86,7 @@ def _remove_all_orders_from_ship(ship):
         return jsonify(remove_all_orders_from_ship(app.db, key, ship))
 
 
-@app.route("/system/<ship>/orders/<int:order_index>", methods=["DELETE"])
+@app.route("/ship/<ship>/orders/<int:order_index>", methods=["DELETE"])
 def _remove_order_from_ship(ship, order_index):
     key = extract_key(request)
     return jsonify(remove_order_from_ship(app.db, key, ship, order_index))
@@ -106,21 +106,22 @@ def _get_ship_info(ship_id):
 
 if __name__ == "__main__":
     # Set up database
-    setup_game(app.db, n_systems=100, avg_n_routes=4, civs=[("one", "one"), ("two", "two")])
+    setup_game(app.db, n_systems=100, avg_n_routes=1, civs=[("one", "one"), ("two", "two")])
 
     # Set up the main game loop
     scheduler = BackgroundScheduler()
+    scheduler.start()
+
 
     # Handling incoming ship orders
-    scheduler.add_job(lambda: process_transits(app.db), 'interval', seconds=31)
-    scheduler.add_job(lambda: process_attacks(app.db), 'interval', seconds=29)
-    scheduler.add_job(lambda: process_ship_orders(app.db), 'interval', seconds=11)
+    scheduler.add_job(lambda: process_transits(app.db), 'interval', seconds=4)
+    scheduler.add_job(lambda: process_attacks(app.db), 'interval', seconds=5)
+    scheduler.add_job(lambda: process_ship_orders(app.db), 'interval', seconds=3)
 
     # Handling incoming system orders
-    scheduler.add_job(lambda: process_system_orders(app.db), 'interval', seconds=150)
+    scheduler.add_job(lambda: process_system_orders(app.db), 'interval', seconds=9)
 
 
-    # Launch background tasks for game
-    scheduler.start()
+
     # Launch the api
-    app.run()
+    app.run(threaded=True)

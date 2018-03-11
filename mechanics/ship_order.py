@@ -7,9 +7,9 @@ def process_ship_orders(db):
 
     :param db: the database to process
     """
-    ship_orders = db.query("SELECT id, orders FROM ships WHERE orders != '{}';").dictresult()
+    ship_orders = db.query("SELECT (id, orders) FROM ships;").dictresult()
     ship_orders_with_flag = db.query(
-        "SELECT id, flag, location, orders FROM ships WHERE orders != '{}';").dictresult()
+        "SELECT (id, flag, location, orders) FROM ships;").dictresult()
 
     _add_all_transits(db, ship_orders)
     _do_all_suicides(db, ship_orders)

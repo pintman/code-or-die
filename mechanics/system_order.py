@@ -22,9 +22,10 @@ def _process_unit_production(db, systems):
                 if count > production:
                     orders_to_keep.append(order)
                 else:
-                    db.query_formatted("INSERT INTO test.public.ships (shipyard, location, flag)"
+                    db.query_formatted("INSERT INTO ships (shipyard, location, flag)"
                                        "VALUES (%s, %s, %s)",
                                        (id, id, controller))
+                    break
         set_system_orders(db, id, orders_to_keep)
 
 

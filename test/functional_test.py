@@ -66,7 +66,7 @@ def test_systems_specific(get):
         'names': [],
         'owner-information': {'tuning-parameters': [], 'tuning_destinations': []},
         'production': 1,
-        'routes': [{'destination': [4], 'distance': 1}]
+        'routes': [{'destination': 4, 'distance': 1}]
     }
     assert get("/systems/2") == None
     assert get("/systems/4") == {
@@ -76,9 +76,9 @@ def test_systems_specific(get):
         'names': ["war"],
         'owner-information': {'tuning-parameters': [], 'tuning_destinations': []},
         'production': 1,
-        'routes': [{'destination': [1], 'distance': 1},
-                   {'destination': [2], 'distance': 2},
-                   {'destination': [3], 'distance': 5}]
+        'routes': [{'destination': 1, 'distance': 1},
+                   {'destination': 2, 'distance': 2},
+                   {'destination': 3, 'distance': 5}]
     }
 
 
