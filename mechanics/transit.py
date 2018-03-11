@@ -11,13 +11,16 @@ def process_transits(db):
 
 
 def transit_is_done(db, transit, time):
+    if travel_time(db, transit) is None: # No route exists
+        return False
+
     is_beam = transit["type"] is "beam_transit"
     travel_time_high_enough = (time - (transit["time"])) >= travel_time(db, transit)
     return is_beam or travel_time_high_enough
 
 
 def travel_time(db, transit):
-    return get_route_distance(db, transit["origin"], transit["destination"])
+    return get_route_distance(db, transit["origin"], transit["destination"]) or 1000000
 
 
 def finish_transit(db, transit):

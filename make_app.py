@@ -6,20 +6,34 @@ import os
 
 def make_app(test=False):
     app = Flask(__name__)
+
     if test:
-        app.db = build_local_database("test")
+        app.db_config = local_database("test")
     else:
-        app.db = build_local_database()
+        app.db_config = local_database()
+
+    def make_db(**config):
+        return lambda: pg.DB(**config)
+
+    app.db_conn = make_db(**app.db_config)
+
+    db = app.db_conn()
+
+    script_path = os.path.abspath(__file__)
+    script_dir = os.path.split(script_path)[0]
+
+    with open(script_dir + "/database/layout.sql") as layout:
+        db.query(layout.read())
 
     return app
 
 
-def build_local_database(dbname=None):
+def local_database(dbname=None):
     script_path = os.path.abspath(__file__)
     script_dir = os.path.split(script_path)[0]
+
     secrets_file = "secrets.txt"
     abs_file_path = os.path.join(script_dir, secrets_file)
-
     with open(abs_file_path) as secrets:
         if dbname:
             secrets.readline()
@@ -28,10 +42,6 @@ def build_local_database(dbname=None):
         host = secrets.readline().replace("\n", "")
         port = int(secrets.readline())
 
-    db = pg.DB(dbname=dbname,
-               host=host,
-               port=port)
-
-    with open(script_dir + "/database/layout.sql") as layout:
-        db.query(layout.read())
-    return db
+    return dict(dbname=dbname,
+                host=host,
+                port=port)

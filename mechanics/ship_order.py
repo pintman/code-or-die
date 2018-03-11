@@ -7,50 +7,55 @@ def process_ship_orders(db):
 
     :param db: the database to process
     """
-    ship_orders = db.query("SELECT (id, orders) FROM ships;").dictresult()
-    ship_orders_with_flag = db.query(
-        "SELECT (id, flag, location, orders) FROM ships;").dictresult()
-
-    _add_all_transits(db, ship_orders)
-    _do_all_suicides(db, ship_orders)
-    _seize_systems(db, ship_orders_with_flag)
+    ship_orders_with_flag = db.query("SELECT id, flag, location, orders FROM ships;").dictresult()
+    print(ship_orders_with_flag)
+    next_orders = _add_all_transits(db, ship_orders_with_flag)
+    next_orders =_do_all_suicides(db, next_orders)
+    next_orders = _seize_systems(db, next_orders)
 
 
 def _add_all_transits(db, ship_order_pairs):
     for ship_and_orders in ship_order_pairs:
         ship_id = ship_and_orders["id"]
         orders = ship_and_orders["orders"]
+        location = ship_and_orders["location"]
+
         orders_not_processed = []
         for order in orders:
-            if order["order"] == "ftl_transit":
-                _add_ftl_transit(db, ship_id, order)
-            elif order["order"] == "beam_transit":
-                _add_beam_transit(db, ship_id, order)
+            if order["order"] == "ftl":
+                _add_ftl_transit(db, ship_id, location, order)
+            elif order["order"] == "beam":
+                _add_beam_transit(db, ship_id, location, order)
             else:
                 orders_not_processed.append(order)
-        set_ship_orders(db, ship_id, orders_not_processed)
+            ship_and_orders["orders"] = orders_not_processed
+    return ship_order_pairs
 
 
-def _add_ftl_transit(db, ship_id, order):
+def _add_ftl_transit(db, ship_id, location, order):
     db.query_formatted("INSERT INTO ftl_transit (ship, origin, destination)"
                        "VALUES (%s, %s, %s)",
-                       (ship_id, order["origin"], order["destination"]))
+                       (ship_id, location, order["destination"]))
 
 
-def _add_beam_transit(db, ship_id, order):
+def _add_beam_transit(db, ship_id, location, order):
     db.query_formatted("INSERT INTO beam_transit (ship, origin, destination, tuning)"
                        "VALUES (%s, %s, %s, %s)",
-                       (ship_id, order["origin"], order["destination"], order["tuning"]))
+                       (ship_id, location, order["destination"], order["tuning"]))
 
 
 def _do_all_suicides(db, ship_order_pairs):
     for ship_and_orders in ship_order_pairs:
         ship = ship_and_orders["id"]
         orders = ship_and_orders["orders"]
-
+        orders_not_processed = []
         for order in orders:
             if order["order"] == "suicide":
                 db.delete("ships", id=ship)
+            else:
+                orders_not_processed.append(order)
+        ship_and_orders["orders"] = orders_not_processed
+    return ship_order_pairs
 
 
 def _seize_systems(db, ships_info):
@@ -62,6 +67,7 @@ def _seize_systems(db, ships_info):
         orders = ship_info["orders"]
         location = ship_info["location"]
         civ = ship_info["flag"]
+
         for order in orders:
             if order["order"] == "seize":
                 if not location in system_seize_attempts_by_civ:
@@ -74,6 +80,7 @@ def _seize_systems(db, ships_info):
                     seize_attempts[civ] = 1
             else:
                 orders_not_processed.append(order)
+
         set_ship_orders(db, ship_id, orders_not_processed)
 
     for system, seize_attempts_list in system_seize_attempts_by_civ.items():

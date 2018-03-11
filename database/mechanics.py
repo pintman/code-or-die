@@ -7,7 +7,7 @@ def get_transits(db):
     :param db:
     :return:
     """
-    return db.query("SELECT * FROM transit").dictresult()
+    return db.query("SELECT type, id, tuning, ship, origin, destination, tuning, time FROM transit").dictresult()
 
 
 def get_route_distance(db, system1, system2):
