@@ -16,7 +16,6 @@ def test_attack(db):
             db.query_formatted("INSERT INTO ships (shipyard, location, flag, orders) "
                                "VALUES (1, %s, %s, %s)", (system, civ, pg.jsonencode(orders)))
 
-
     add_ships_to_system(system=4, civ=1, num_ships=2, attack_targets=[3])
 
     assert army_sizes_at_system(db, 4) == {"earth": 3, "venus": 1}
@@ -24,7 +23,6 @@ def test_attack(db):
     for i in range(10):
         process_attacks(db)
     assert army_sizes_at_system(db, 4) == {"earth": 3}
-
 
     # Create system 5
     db.query("INSERT INTO systems(id) VALUES (5)")
@@ -36,5 +34,3 @@ def test_attack(db):
     process_attacks(db)
     assert army_sizes_at_system(db, 5)["earth"] < 90
     assert army_sizes_at_system(db, 5)["venus"] < 90
-
-

@@ -19,6 +19,7 @@ def build_local_database(dbname=None):
     script_dir = os.path.split(script_path)[0]
     secrets_file = "secrets.txt"
     abs_file_path = os.path.join(script_dir, secrets_file)
+
     with open(abs_file_path) as secrets:
         if dbname:
             secrets.readline()
@@ -30,4 +31,7 @@ def build_local_database(dbname=None):
     db = pg.DB(dbname=dbname,
                host=host,
                port=port)
+
+    with open(script_dir + "/database/layout.sql") as layout:
+        db.query(layout.read())
     return db

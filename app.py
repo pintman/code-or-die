@@ -7,6 +7,7 @@ from mechanics.transit import process_transits
 from mechanics.attack import process_attacks
 from mechanics.ship_order import process_ship_orders
 from mechanics.system_order import process_system_orders
+from setup.setup import *
 
 from apscheduler.schedulers.background import BackgroundScheduler
 
@@ -105,10 +106,7 @@ def _get_ship_info(ship_id):
 
 if __name__ == "__main__":
     # Set up database
-    # build_systems(app.db)
-    # build_routes(app.db)
-    # create_num_civs(2)
-
+    setup_game(app.db, n_systems=100, avg_n_routes=4, civs=[("one", "one"), ("two", "two")])
 
     # Set up the main game loop
     scheduler = BackgroundScheduler()
@@ -121,7 +119,6 @@ if __name__ == "__main__":
     # Handling incoming system orders
     scheduler.add_job(lambda: process_system_orders(app.db), 'interval', seconds=150)
 
-    # Processing the database
 
     # Launch background tasks for game
     scheduler.start()
