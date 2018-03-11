@@ -65,6 +65,8 @@ def setup_db(db, graph, civs):
         db.query_formatted("INSERT INTO routes (origin, destination, distance) VALUES (%s, %s, %s)",
                            (origin, destination, attrs["distance"]))
 
-    for civ in civs:
+    for index, civ in enumerate(civs):
         db.query_formatted("INSERT INTO civilizations (name, homeworld, key) VALUES (%s, %s, %s)",
                            (civ["name"], civ["homeworld"], civ["key"]))
+        db.query_formatted("UPDATE systems SET controller = %s WHERE id = %s",
+                           (index + 1, civ["homeworld"]))
