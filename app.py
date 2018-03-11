@@ -112,9 +112,9 @@ if __name__ == "__main__":
     scheduler = BackgroundScheduler()
 
     # Handling incoming ship orders
-    scheduler.add_job(lambda: process_transits(app.db), 'interval', seconds=30)
-    scheduler.add_job(lambda: process_attacks(app.db), 'interval', seconds=30)
-    scheduler.add_job(lambda: process_ship_orders(app.db), 'interval', seconds=5)
+    scheduler.add_job(lambda: process_transits(app.db), 'interval', seconds=31)
+    scheduler.add_job(lambda: process_attacks(app.db), 'interval', seconds=29)
+    scheduler.add_job(lambda: process_ship_orders(app.db), 'interval', seconds=11)
 
     # Handling incoming system orders
     scheduler.add_job(lambda: process_system_orders(app.db), 'interval', seconds=150)
