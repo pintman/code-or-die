@@ -117,3 +117,7 @@ def set_system_orders(db, system, orders):
         return None
     db.query_formatted("UPDATE systems SET orders = %s WHERE id = %s",
                        (pg.jsonencode(orders), sys["id"]))
+
+
+def get_civ_by_name(db, name):
+    return db.get("civilizations", name, "name")["id"]

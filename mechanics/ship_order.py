@@ -8,7 +8,6 @@ def process_ship_orders(db):
     :param db: the database to process
     """
     ship_orders_with_flag = db.query("SELECT id, flag, location, orders FROM ships;").dictresult()
-    print(ship_orders_with_flag)
     next_orders = _add_all_transits(db, ship_orders_with_flag)
     next_orders =_do_all_suicides(db, next_orders)
     next_orders = _seize_systems(db, next_orders)

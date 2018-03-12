@@ -56,14 +56,17 @@ def _add_convenience_name(system, new_convenience_name):
     return jsonify(add_convenience_name(app.db_conn(), system, new_convenience_name))
 
 
-@app.route("/system/<system>/orders", methods=["GET", "POST", "DELETE"])
+@app.route("/system/<system>/orders", methods=["GET", "PUT", "POST", "DELETE"])
 def _system_orders(system):
     key = extract_key(request)
     if request.method == "GET":
         return jsonify(system_orders(app.db_conn(), key, system))
-    if request.method == "POST":
+    if request.method == "PUT":
         order = request.get_json(force=True)
         return jsonify(add_order_to_system(app.db_conn(), key, system, order))
+    if request.method == "POST":
+        order = request.get_json(force=True)
+        return jsonify(set_system_orders_by_key(app.db_conn(), key, system, order))
     if request.method == "DELETE":
         return jsonify(remove_all_orders_from_system(app.db_conn(), key, system))
 
@@ -79,9 +82,12 @@ def _remove_all_orders_from_ship(ship):
     key = extract_key(request)
     if request.method == "GET":
         return jsonify(get_orders_from_ship(app.db_conn(), key, ship))
-    elif request.method == "POST":
+    elif request.method == "PUT":
         order = request.get_json(force=True)
         return jsonify(add_order_to_ship(app.db_conn(), key, ship, order))
+    elif request.method == "POST":
+        orders = request.get_json(force=True)
+        return jsonify(set_ship_orders(app.db, key, ship, orders))
     elif request.method == "DELETE":
         return jsonify(remove_all_orders_from_ship(app.db_conn(), key, ship))
 
@@ -98,7 +104,7 @@ def _get_ships():
     return jsonify(get_ships(app.db_conn(), key))
 
 
-@app.route("/ship/<int:ship_id>")
+@app.route("/ship/<int:ship_id>", methods=["GET"])
 def _get_ship_info(ship_id):
     key = extract_key(request)
     return jsonify(get_ship_info(app.db_conn(), key, ship_id))
@@ -107,11 +113,14 @@ def _get_ship_info(ship_id):
 def transits_job():
     process_transits(app.db_conn())
 
+
 def attacks_job():
     process_attacks(app.db_conn())
 
+
 def ship_orders_job():
     process_ship_orders(app.db_conn())
+
 
 def system_orders_job():
     process_system_orders(app.db_conn())
@@ -124,14 +133,16 @@ if __name__ == "__main__":
     # Set up the main game loop
     scheduler = BackgroundScheduler()
 
-    jobs = [(transits_job, 1),
-            (attacks_job, 5),
-            (ship_orders_job, 3),
-            (system_orders_job, 1)]
+    jobs = [
+        (transits_job, 1),
+        (attacks_job, 5),
+        (ship_orders_job, 3),
+        (system_orders_job, 1)
+    ]
     for job, interval in jobs:
         scheduler.add_job(job, 'interval', seconds=interval)
 
     scheduler.start()
 
     # Launch the api
-    app.run(threaded=True)
+    app.run(threaded=True, host='0.0.0.0', port=80)

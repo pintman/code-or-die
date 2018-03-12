@@ -1,4 +1,4 @@
-from database.common import set_system_orders
+from database.common import set_system_orders, get_civ_by_name
 
 def process_system_orders(db):
     systems = db.query("SELECT id, production, controller, orders FROM systems").dictresult()
@@ -11,20 +11,20 @@ def _process_unit_production(db, systems):
     for system in systems:
         id = system['id']
         production = system["production"]
-        controller = system["controller"]
         orders = system["orders"]
         orders_to_keep = []
         for order in orders:
             if order["order"] != "build":
                 orders_to_keep.append(order)
             else:
+                civ = get_civ_by_name(db, order["team"])
                 count = order["count"]
                 if count > production:
                     orders_to_keep.append(order)
                 else:
                     db.query_formatted("INSERT INTO ships (shipyard, location, flag)"
                                        "VALUES (%s, %s, %s)",
-                                       (id, id, controller))
+                                       (id, id, civ))
                     break
         set_system_orders(db, id, orders_to_keep)
 

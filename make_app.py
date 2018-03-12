@@ -34,14 +34,21 @@ def local_database(dbname=None):
 
     secrets_file = "secrets.txt"
     abs_file_path = os.path.join(script_dir, secrets_file)
+    def next():
+        return secrets.readline().replace("\n", "")
+
     with open(abs_file_path) as secrets:
         if dbname:
-            secrets.readline()
+            next()
         else:
-            dbname = secrets.readline().replace("\n", "")
-        host = secrets.readline().replace("\n", "")
-        port = int(secrets.readline())
+            dbname = next()
+        host = next()
+        port = int(next())
+        user = next()
+        password = next()
 
     return dict(dbname=dbname,
                 host=host,
-                port=port)
+                port=port,
+                user=user,
+                passwd=password)
