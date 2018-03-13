@@ -33,6 +33,10 @@ def _set_token_for_team():
     new_key = request.get_json(force=True)["new-api-key"]
     return jsonify(set_token_for_team(app.db_conn(), old_key, new_key))
 
+@app.route("/civ-info", methods=["GET"])
+def _civ_info():
+    key = extract_key(request)
+    return jsonify(civ_info(app.db_conn(), key))
 
 @app.route("/systems", methods=["GET"])
 def _systems_for_team():
@@ -77,7 +81,7 @@ def _remove_order_from_system(system, order_index):
     return jsonify(remove_order_from_system(app.db_conn(), key, system, order_index))
 
 
-@app.route("/ship/<ship>/orders", methods=["GET", "POST", "DELETE"])
+@app.route("/ship/<ship>/orders", methods=["GET", "PUT", "POST", "DELETE"])
 def _remove_all_orders_from_ship(ship):
     key = extract_key(request)
     if request.method == "GET":

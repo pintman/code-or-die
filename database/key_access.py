@@ -39,12 +39,32 @@ def civ_systems(db, key):
     """
     civ_id = get_civ(db, key)
     if civ_id is None:
-        return []
+        return None
 
-    result = db.query_formatted("SELECT * FROM systems WHERE controller = %s",
-                                (civ_id,))
-    dictresult = result.dictresult()
-    return [elem["id"] for elem in dictresult]
+    owned = db.query_formatted("SELECT * FROM systems WHERE controller = %s",
+                               (civ_id,)).dictresult()
+
+    has_ships_in = db.query_formatted("SELECT DISTINCT(location) FROM ships WHERE flag = %s",
+                                      (civ_id,)).dictresult()
+
+    owned_ids = [elem["id"] for elem in owned]
+    has_ships_in_ids = [elem["location"] for elem in has_ships_in]
+
+    return list(set(owned_ids + has_ships_in_ids))
+
+
+def get_civ_info(db, key):
+    """Returns information on the given civ.
+
+    :param db: the database to use
+    :param key: the key of the civ
+    :return:
+    """
+    result = db.get("civilizations", key, "key")
+    return {
+        "name": result["name"],
+        "homeworld": result["homeworld"]
+    }
 
 
 def civ_owns(db, civ_id, system):
@@ -200,6 +220,7 @@ def get_system_info(db, key, system):
         "owner-information": owner_information
     }
 
+
 def _get_system_by_id(db, system_id):
     """Gets the system with the given id.
 
@@ -220,7 +241,6 @@ def _get_system_by_name(db, name):
     """
     result = db.query_formatted("SELECT * FROM systems WHERE %s = ANY(names)", (name,))
     return result_to_first_element(result)
-
 
 
 def get_system_orders(db, key, system):

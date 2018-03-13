@@ -1,6 +1,6 @@
 """Functions related to team management"""
 
-from database.key_access import get_civ, set_civ_key, civ_systems
+from database.key_access import get_civ, set_civ_key, civ_systems, get_civ_info
 
 
 def set_token_for_team(db, old_key, new_key):
@@ -27,3 +27,12 @@ def systems_for_team(db, key):
     result = civ_systems(db, key)
     result.sort()
     return result
+
+def civ_info(db, key):
+    """Returns info on the civilization with the given key, including their homeworld
+
+    :param db: the database to use
+    :param key: the key of the civilizatino to check
+    :return: information about the civ
+    """
+    return get_civ_info(db, key)

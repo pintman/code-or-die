@@ -63,7 +63,7 @@ def add_order_to_system(db, key, system, order):
     :param order: the order
     :return: the new list of orders at the given system, or None if you can't add that order
     """
-    new_orders = get_system_orders(db, key, system)
+    new_orders = get_system_orders(db, key, system) or []
     new_orders.append(order)
     set_system_orders_by_key(db, key, system, new_orders)
     return new_orders
