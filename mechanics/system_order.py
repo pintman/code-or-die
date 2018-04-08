@@ -9,7 +9,7 @@ def process_system_orders(db):
 
 def _process_unit_production(db, systems):
     for system in systems:
-        id = system['id']
+        system_id = system['id']
         production = system["production"]
         orders = system["orders"]
         orders_to_keep = []
@@ -17,16 +17,20 @@ def _process_unit_production(db, systems):
             if order["order"] != "build":
                 orders_to_keep.append(order)
             else:
-                civ = get_civ_by_name(db, order["team"])
+                if not "civ" in order:
+                    return
+                civ = get_civ_by_name(db, order["civ"])
+                if not civ:
+                    return
                 count = order["count"]
                 if count > production:
                     orders_to_keep.append(order)
                 else:
                     db.query_formatted("INSERT INTO ships (shipyard, location, flag)"
                                        "VALUES (%s, %s, %s)",
-                                       (id, id, civ))
-                    break
-        set_system_orders(db, id, orders_to_keep)
+                                       (system_id, system_id, civ))
+                break
+        set_system_orders(db, system_id, orders_to_keep)
 
 
 def _process_beam_motivator_toggles(db, systems):

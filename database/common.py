@@ -120,4 +120,7 @@ def set_system_orders(db, system, orders):
 
 
 def get_civ_by_name(db, name):
-    return db.get("civilizations", name, "name")["id"]
+    try:
+        return db.get("civilizations", name, "name")["id"]
+    except pg.DatabaseError as no_such_civ_exists:
+        return None

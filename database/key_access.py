@@ -60,11 +60,14 @@ def get_civ_info(db, key):
     :param key: the key of the civ
     :return:
     """
-    result = db.get("civilizations", key, "key")
-    return {
-        "name": result["name"],
-        "homeworld": result["homeworld"]
-    }
+    try:
+        result = db.get("civilizations", key, "key")
+        return {
+            "name": result["name"],
+            "homeworld": result["homeworld"]
+        }
+    except pg.DatabaseError as no_civ:
+        return None
 
 
 def civ_owns(db, civ_id, system):
@@ -128,7 +131,7 @@ def get_ship_for_civ(db, key, ship):
     ship = db.query_formatted("SELECT * FROM ships WHERE id = %s AND flag = %s",
                               (ship, get_civ(db, key))
                               ).dictresult()
-    if not ship:
+    if not ship or len(ship) is 0:
         return None
     else:
         return ship[0]
@@ -198,7 +201,7 @@ def get_system_info(db, key, system):
     system = _get_system_by_id(db, system_id)
 
     system_names = system["names"]
-    controller_id = system["controller"]
+    controller_id = get_civ_name(db, system["controller"])
     production = system["production"]
     armies = army_sizes_at_system(db, system_id)
     routes = routes_from(db, system_id)
@@ -229,17 +232,6 @@ def _get_system_by_id(db, system_id):
     :return: the system, or None if there isn't one
     """
     result = db.query_formatted("SELECT * FROM systems WHERE id = %s", (system_id,))
-    return result_to_first_element(result)
-
-
-def _get_system_by_name(db, name):
-    """Gets the system with the given name.
-
-    :param db: the database to search
-    :param name: the name of the system to find
-    :return: the system, or None if there isn't one
-    """
-    result = db.query_formatted("SELECT * FROM systems WHERE %s = ANY(names)", (name,))
     return result_to_first_element(result)
 
 

@@ -24,7 +24,7 @@ def test_civ_systems(db):
     assert 1 in civ_systems(db, "key1")
     assert 4 in civ_systems(db, "key1")
     assert civ_systems(db, "key2") == [2]
-    assert civ_systems(db, "key3") == [3]
+    assert civ_systems(db, "key3") == [3, 4]
 
 
 def test_civ_owns(db):

@@ -22,7 +22,8 @@ def get_system_convenience_names(db, system_id):
     :param system_id: the system to check
     :return: the corresponding names
     """
-    result = db.query_formatted("SELECT names FROM systems WHERE id = %s", (system_id,))
+    result = db.query_formatted("SELECT names FROM systems WHERE id = %s",
+                                (system_to_id(db, system_id),))
 
     try:
         return result.dictresult()[0]["names"]
@@ -30,7 +31,7 @@ def get_system_convenience_names(db, system_id):
         return None
 
 
-def add_convenience_name(db, system_id, name):
+def add_convenience_name(db, system, name):
     """
     Adds the given name to the names of the system with the given id
     :param db: the database to use
@@ -39,8 +40,9 @@ def add_convenience_name(db, system_id, name):
     :return: True if successful, False otherwise
     """
     db.query_formatted(
-        "UPDATE systems SET names = array_append(names, %s) WHERE id = %s  ",
-        (name, system_id))
+        "UPDATE systems SET names = array_append(names, %s) WHERE id = %s;",
+        (name, system_to_id(db, system)))
+    return True
 
 
 def system_orders(db, key, system):

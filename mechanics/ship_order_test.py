@@ -15,7 +15,7 @@ def test_ftl_transit_processing(db):
         return db.query("SELECT * FROM transit").dictresult()
 
     assert len(transits()) == 0
-    add_order(db, 1, {"order": "ftl_transit", "origin": 1, "destination": 4})
+    add_order(db, 1, {"order": "ftl", "origin": 1, "destination": 4})
     assert len(transits()) == 0
 
     process_ship_orders(db)
@@ -30,7 +30,7 @@ def test_beam_transit_processing(db):
         return db.query("SELECT * FROM transit").dictresult()
 
     assert len(transits()) == 0
-    add_order(db, 1, {"order": "beam_transit", "origin": 1, "destination": 4, "tuning": 0})
+    add_order(db, 1, {"order": "beam", "origin": 1, "destination": 4, "tuning": 0})
     assert len(transits()) == 0
 
     process_ship_orders(db)
@@ -51,10 +51,12 @@ def test_suicide_processing(db):
 
 def test_seizing_systems(db):
     from database.key_access import civ_systems
+    def num_systems_for_civ1():
+        return len(db.query("SELECT * FROM systems WHERE controller = 1").dictresult())
 
-    assert len(civ_systems(db, "key1")) == 2
+    assert num_systems_for_civ1() == 2
 
     add_order(db, 4, {"order": "seize"})
     process_ship_orders(db)
 
-    assert len(civ_systems(db, "key1")) == 1
+    assert num_systems_for_civ1() == 1

@@ -9,6 +9,6 @@ def set_orders(db, system_id, orders):
 
 def test_unit_production(db):
     assert len(ships_at_system(db, 1)[1]) == 2
-    set_orders(db, 1, [{"order": "build", "count": 1, "team": 1}])
+    set_orders(db, 1, [{"order": "build", "count": 1, "civ": "earth"}])
     process_system_orders(db)
     assert len(ships_at_system(db, 1)[1]) == 3

@@ -33,10 +33,12 @@ def _set_token_for_team():
     new_key = request.get_json(force=True)["new-api-key"]
     return jsonify(set_token_for_team(app.db_conn(), old_key, new_key))
 
+
 @app.route("/civ-info", methods=["GET"])
 def _civ_info():
     key = extract_key(request)
     return jsonify(civ_info(app.db_conn(), key))
+
 
 @app.route("/systems", methods=["GET"])
 def _systems_for_team():
@@ -91,7 +93,7 @@ def _remove_all_orders_from_ship(ship):
         return jsonify(add_order_to_ship(app.db_conn(), key, ship, order))
     elif request.method == "POST":
         orders = request.get_json(force=True)
-        return jsonify(set_ship_orders(app.db, key, ship, orders))
+        return jsonify(set_ship_orders(app.db_conn(), key, ship, orders))
     elif request.method == "DELETE":
         return jsonify(remove_all_orders_from_ship(app.db_conn(), key, ship))
 
@@ -132,15 +134,18 @@ def system_orders_job():
 
 if __name__ == "__main__":
     # Set up database
-    setup_game(app.db_conn(), n_systems=100, avg_n_routes=1, civs=[("one", "one"), ("two", "two")])
+    setup_game(app.db_conn(), n_systems=100, avg_n_routes=1, civs=[
+        ("one", "one"),
+        ("two", "two")
+    ])
 
     # Set up the main game loop
     scheduler = BackgroundScheduler()
 
     jobs = [
         (transits_job, 1),
-        (attacks_job, 5),
-        (ship_orders_job, 3),
+        (attacks_job, 1),
+        (ship_orders_job, 1),
         (system_orders_job, 1)
     ]
     for job, interval in jobs:

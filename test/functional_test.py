@@ -6,6 +6,7 @@ from test.fixtures import db
 
 def make_client():
     app.db = db()
+    app.db_conn = db
     client = app.test_client()
     return client
 
@@ -21,6 +22,11 @@ def post():
 
 
 @pytest.fixture
+def put():
+    return http_action_fixture(lambda client, url, **kwargs: client.put(url, **kwargs))
+
+
+@pytest.fixture
 def delete():
     return http_action_fixture(lambda client, url, **kwargs: client.delete(url, **kwargs))
 
@@ -28,12 +34,10 @@ def delete():
 def http_action_fixture(client_func):
     client = make_client()
 
-    def action(url, headers=None, data=None, **kwargs):
+    def action(url, headers=None, **kwargs):
         final_headers = {"api-key": "key1", "content-type": "application/json"}
         final_headers.update(headers or {})
         kwargs.update({"headers": final_headers})
-        if data:
-            kwargs.update({"data": json.dumps(data)})
         response = client_func(client, url, **kwargs)
         return json.loads(response.data)
 
@@ -42,20 +46,18 @@ def http_action_fixture(client_func):
 
 def test_set_api_key(get, post):
     assert get("/systems") == [1, 4]
-    assert get("/systems", headers={"api-key": "the-new-key"}) == []
+    assert get("/systems", headers={"api-key": "the-new-key"}) == None
 
-    assert post("/set-api-key", data={
-        "new-api-key": "the-new-key"
-    }) is True
+    assert post("/set-api-key", data={"new-api-key": "the-new-key"}) is True
 
-    assert get("/systems") == []
+    assert get("/systems") == None
     assert get("/systems", headers={"api-key": "the-new-key"}) == [1, 4]
 
 
 def test_get_systems(get):
     assert get("/systems") == [1, 4]
     assert get("/systems", headers={"api-key": "key2"}) == [2]
-    assert get("/systems", headers={"api-key": "key17"}) == []
+    assert get("/systems", headers={"api-key": "key17"}) == None
 
 
 def test_systems_specific(get):
@@ -94,26 +96,26 @@ def test_system_put_convenience_name(get, post):
     assert get("/systems/names/1", {"api-key": "doesn't matter"}) == ["planet"]
 
 
-def test_system_orders(get, post, delete):
+def test_system_orders(get, put, post, delete):
     order1 = {"order": "repair-mode"}
     order2 = {"order": "transit-mode"}
     order3 = {"order": "abandon"}
-    order4 = {"order": "build", "count": 1, "civ": [1]}
+    order4 = {"order": "build", "count": 1, "civ": "earth"}
 
     def system_1_orders():
         return get("/system/1/orders")
 
     assert system_1_orders() == []
-    post("/system/1/orders", data=order1)
+    put("/system/1/orders", data=order1)
     assert system_1_orders() == [order1]
 
-    post("/system/1/orders", data=order2)
+    put("/system/1/orders", data=order2)
     assert system_1_orders() == [order1, order2]
 
-    post("/system/1/orders", data=order3)
+    put("/system/1/orders", data=order3)
     assert system_1_orders() == [order1, order2, order3]
 
-    post("/system/1/orders", data=order4)
+    put("/system/1/orders", data=order4)
     assert system_1_orders() == [order1, order2, order3, order4]
 
     delete("/system/1/orders/1")
