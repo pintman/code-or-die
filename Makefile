@@ -1,8 +1,8 @@
 ROOT_DIR := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
-SHELL    := $(ROOT_DIR)/env /bin/zsh
-DB_DIR   := $(ROOT_DIR)/../db
+SHELL    := /usr/bin/env /bin/zsh
+DB_DIR   := /var/lib/postgresql/9.4/main
 LOGS_DIR := $(DB_DIR)/logs
-DATABASE := code-or-die
+DATABASE := code_or_die
 
 .PHONY: test
 test:
