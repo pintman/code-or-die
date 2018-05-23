@@ -3,6 +3,8 @@
 \set VERBOSITY terse
 \set ON_ERROR_STOP true
 
+create or replace language plpython3u;
+
 do language plpgsql $$ declare
 	exc_message text;
 	exc_context text;
