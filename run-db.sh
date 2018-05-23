@@ -14,12 +14,12 @@ if [[ ! -e "$logs_dir" ]]; then
 fi
 
 shutdown() {
-    pg_ctl -D $db_dir stop 2>/dev/null
+    pg_ctlcluster -D $db_dir stop 2>/dev/null
 }
 
 trap "trap - SIGTERM && shutdown && exit 1 && kill -- -$$" SIGINT SIGTERM exit
 
-pg_ctl -D $db_dir -l $logs_dir/"$(date +%Y-%m-%d.%H%M%S).log" start
+pg_ctlcluster -D $db_dir -l $logs_dir/"$(date +%Y-%m-%d.%H%M%S).log" start
 if [[ $? != 0 ]]; then
     echo "failed to start"
     exit $?
