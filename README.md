@@ -73,7 +73,7 @@ Ships can be instructed to travel to a destination (node-by-node fast-travel) vi
 
 Beam travel is nearly instantaneous. FTL travel time is based on edge weights. All travel is node-by-node. Travel destination must be specified on an immediate-next-node basis.
 
-e.g., systems A, B, and C are connected A → B → C. To transit from A to C, a ship must be instructed to first transit from A to B then B to C.
+e.g., systems A, B, and C are connected A -> B -> C. To transit from A to C, a ship must be instructed to first transit from A to B then B to C.
 
 Ship actions belong to a queue (to facilitate multi-hop travel and complex actions.) Queued actions can be canceled.
 
